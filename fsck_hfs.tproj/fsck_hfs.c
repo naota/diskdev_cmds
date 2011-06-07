@@ -23,10 +23,14 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/param.h>
+#if !LINUX
 #include <sys/ucred.h>
+#endif
 #include <sys/mount.h>
 #include <sys/ioctl.h>
+#if !LINUX
 #include <sys/disk.h>
+#endif
 #include <sys/sysctl.h>
 #include <setjmp.h>
 
@@ -116,7 +120,7 @@ main(argc, argv)
 	else
 		progname = *argv;
 
-	while ((ch = getopt(argc, argv, "b:B:c:D:Edfglm:npqruyx")) != EOF) {
+	while ((ch = getopt(argc, argv, "b:B:c:D:Edfglm:napqruyx")) != EOF) {
 		switch (ch) {
 		case 'b':
 			gBlockSize = atoi(optarg);
@@ -201,6 +205,7 @@ main(argc, argv)
 			yflag = 0;
 			break;
 
+		case 'a':
 		case 'p':
 			preen++;
 			break;
@@ -267,10 +272,12 @@ main(argc, argv)
 	
 	if (guiControl)
 		debug = 0; /* debugging is for command line only */
-
+#if LINUX
+// FIXME
+#else
 	if (signal(SIGINT, SIG_IGN) != SIG_IGN)
 		(void)signal(SIGINT, catch);
-
+#endif
 	if (argc < 1) {
 		(void) fplog(stderr, "%s: missing special-device\n", progname);
 		usage();
@@ -303,7 +310,9 @@ checkfilesys(char * filesys)
 	int chkLev, repLev, logLev;
 	int canWrite;
 	char *unraw, *mntonname;
+#if !LINUX
 	struct statfs64 *fsinfo;
+#endif
 	fsck_ctx_t context = NULL;
 	flags = 0;
 	cdevname = filesys;
@@ -377,7 +386,7 @@ checkfilesys(char * filesys)
 		    }
 		}
 	}
-
+#endif
 	if (debug && preen)
 		pwarn("starting\n");
 	
@@ -483,7 +492,9 @@ checkfilesys(char * filesys)
 	/* XXX free any allocated memory here */
 
 	if (hotroot && fsmodified) {
+#if !LINUX
 		struct hfs_mount_args args;
+#endif
 		/*
 		 * We modified the root.  Do a mount update on
 		 * it, unless it is read-write, so we can continue.
@@ -498,6 +509,7 @@ checkfilesys(char * filesys)
 				goto ExitThisRoutine;
 			}
 		}
+#endif
 		if (!preen)
 			plog("\n***** REBOOT NOW *****\n");
 		sync();
@@ -547,11 +559,13 @@ setup( char *dev, int *canWritePtr )
 		plog("Can't stat %s: %s\n", dev, strerror(errno));
 		return (0);
 	}
+#if !LINUX
 	if ((statb.st_mode & S_IFMT) != S_IFCHR) {
 		pfatal("%s is not a character device", dev);
 		if (reply("CONTINUE") == 0)
 			return (0);
 	}
+#endif
 	/* attempt to get write access to the block device and if not check if volume is */
 	/* mounted read-only.  */
 	getWriteAccess( dev, canWritePtr );
@@ -584,10 +598,14 @@ setup( char *dev, int *canWritePtr )
 
 
 	/* Get device block size to initialize cache */
+#if LINUX
+	devBlockSize = 512;
+#else
 	if (ioctl(fsreadfd, DKIOCGETBLOCKSIZE, &devBlockSize) < 0) {
 		pfatal ("Can't get device block size\n");
 		return (0);
 	}
+#endif
 
 	 /*
 	  * Calculate the cache block size and total blocks.
@@ -644,11 +662,15 @@ setup( char *dev, int *canWritePtr )
 
 static void getWriteAccess( char *dev, int *canWritePtr )
 {
+#if !LINUX
 	int					i;
 	int					myMountsCount;
+#endif
 	void *				myPtr;
 	char *				myCharPtr;
+#if !LINUX
 	struct statfs64 *		myBufPtr;
+#endif
 	void *				myNamePtr;
 	int				blockDevice_fd = -1;
 
@@ -695,8 +717,8 @@ static void getWriteAccess( char *dev, int *canWritePtr )
 		}
 		myBufPtr++;
 	}
+#endif
 	*canWritePtr = 1;  // single user will get us here, f_mntfromname is not /dev/diskXXXX 
-	
 ExitThisRoutine:
 	if ( myPtr != NULL )
 		free( myPtr );
@@ -726,7 +748,7 @@ usage()
 	(void) fplog(stderr, "  l = live fsck (lock down and test-only)\n");
 	(void) fplog(stderr, "  m arg = octal mode used when creating lost+found directory \n");
 	(void) fplog(stderr, "  n = assume a no response \n");
-	(void) fplog(stderr, "  p = just fix normal inconsistencies \n");
+	(void) fplog(stderr, "  p, a = just fix normal inconsistencies \n");
 	(void) fplog(stderr, "  q = quick check returns clean, dirty, or failure \n");
 	(void) fplog(stderr, "  r = rebuild catalog btree \n");
 	(void) fplog(stderr, "  u = usage \n");

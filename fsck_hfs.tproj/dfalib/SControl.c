@@ -1089,7 +1089,7 @@ static int ScavSetUp( SGlob *GPtr)
 		pointer = (ScavStaticStructures *) AllocateClearMemory( sizeof(ScavStaticStructures) );
 		if ( pointer == nil ) {
 			if ( fsckGetVerbosity(GPtr->context) >= kDebugLog ) {
-				plog( "\t error %d - could not allocate %ld bytes of memory \n",
+				plog( "\t error %d - could not allocate %i bytes of memory \n",
 					R_NoMem, sizeof(ScavStaticStructures) );
 			}
 			return( R_NoMem );

@@ -26,8 +26,11 @@
 #define __SRUNTIME__
 
 #if BSD
-
+#if LINUX
+#include "missing.h"
+#else
 #include <sys/types.h>
+#endif
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -89,10 +92,12 @@ typedef const unsigned char *	ConstStr255Param;
 
 typedef u_int32_t	HFSCatalogNodeID;
 
+#if !LINUX
 enum {
 	false		= 0,
 	true		= 1
 };
+#endif
 
 /* OS error codes */
 enum {

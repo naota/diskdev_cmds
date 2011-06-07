@@ -32,10 +32,16 @@
 #include <sys/param.h>
 #include <sys/types.h>
 #include <sys/time.h>
+#if LINUX
+#include <time.h>
+#include "missing.h"
+#endif
 #include <sys/errno.h>
 #include <sys/stat.h>
 #include <sys/sysctl.h>
+#if !LINUX
 #include <sys/vmmeter.h>
+#endif
 
 #include <err.h>
 #include <errno.h>
@@ -57,13 +63,17 @@
 
 #include <libkern/OSByteOrder.h>
 
+#if !LINUX
 #include <CoreFoundation/CFString.h>
 #include <CoreFoundation/CFStringEncodingExt.h>
+#endif
 #include <DiskArbitration/DiskArbitration.h>
 
 #include <TargetConditionals.h>
 
+#if !LINUX
 extern Boolean _CFStringGetFileSystemRepresentation(CFStringRef string, UInt8 *buffer, CFIndex maxBufLen);
+#endif
 
 
 #include <hfs/hfs_format.h>
@@ -74,7 +84,7 @@ extern Boolean _CFStringGetFileSystemRepresentation(CFStringRef string, UInt8 *b
 #include "readme.h"
 
 
-#define HFS_BOOT_DATA	"/usr/share/misc/hfsbootdata"
+#define HFS_BOOT_DATA	"/usr/share/hfsprogs/hfsbootdata"
 
 #define HFS_JOURNAL_FILE	".journal"
 #define HFS_JOURNAL_INFO	".journal_info_block"
@@ -143,7 +153,9 @@ static UInt32 Largest __P((UInt32 a, UInt32 b, UInt32 c, UInt32 d ));
 static void MarkBitInAllocationBuffer __P((HFSPlusVolumeHeader *header,
 		UInt32 allocationBlock, void* sectorBuffer, UInt64 *sector));
 
+#if !LINUX
 static UInt32 GetDefaultEncoding();
+#endif
 
 static UInt32 UTCToLocal __P((UInt32 utcTime));
 
@@ -172,7 +184,9 @@ void SETOFFSET (void *buffer, UInt16 btNodeSize, SInt16 recOffset, SInt16 vecOff
 
 #define ROUNDUP(x, u)	(((x) % (u) == 0) ? (x) : ((x)/(u) + 1) * (u))
 
-#if TARGET_OS_EMBEDDED
+#if LINUX
+#define ENCODING_TO_BIT(e)       (e)
+#elsif TARGET_OS_EMBEDDED
 #define ENCODING_TO_BIT(e)				 \
 	  ((e) < 48 ? (e) : 0)
 #else
@@ -599,6 +613,7 @@ InitMDB(hfsparams_t *defaults, UInt32 driveBlocks, HFS_MDB *mdbp)
 	 * Map UTF-8 input into a Mac encoding.
 	 * On conversion errors "untitled" is used as a fallback.
 	 */
+#if !LINUX
 	{
 		UniChar unibuf[kHFSMaxVolumeNameChars];
 		CFStringRef cfstr;
@@ -624,7 +639,11 @@ InitMDB(hfsparams_t *defaults, UInt32 driveBlocks, HFS_MDB *mdbp)
 		bcopy(&mdbp->drVN[1], defaults->volumeName, mdbp->drVN[0]);
 		defaults->volumeName[mdbp->drVN[0]] = '\0';
 	}
+#endif
 	/* Save the encoding hint in the Finder Info (field 4). */
+	mdbp->drVN[0] = strlen(defaults->volumeName);
+	bcopy(defaults->volumeName,&mdbp->drVN[1],mdbp->drVN[0]);
+	
 	mdbp->drFndrInfo[4] = SET_HFS_TEXT_ENCODING(defaults->encodingHint);
 
 	mdbp->drWrCnt = kWriteSeqNum;
@@ -1434,9 +1453,11 @@ InitCatalogRoot_HFSPlus(const hfsparams_t *dp, const HFSPlusVolumeHeader *header
 	UInt16					nodeSize;
 	SInt16					offset;
 	size_t					unicodeBytes;
+#if !LINUX
 	UInt8 canonicalName[256];
 	CFStringRef cfstr;
 	Boolean	cfOK;
+#endif
 	int index = 0;
 
 	nodeSize = dp->catalogNodeSize;
@@ -1456,7 +1477,9 @@ InitCatalogRoot_HFSPlus(const hfsparams_t *dp, const HFSPlusVolumeHeader *header
 	 * First record is always the root directory...
 	 */
 	ckp = (HFSPlusCatalogKey *)((UInt8 *)buffer + offset);
-	
+#if LINUX	
+	ConvertUTF8toUnicode(dp->volumeName, sizeof(ckp->nodeName.unicode), ckp->nodeName.unicode, &ckp->nodeName.length);
+#else
 	/* Use CFString functions to get a HFSPlus Canonical name */
 	cfstr = CFStringCreateWithCString(kCFAllocatorDefault, (char *)dp->volumeName, kCFStringEncodingUTF8);
 	cfOK = _CFStringGetFileSystemRepresentation(cfstr, canonicalName, sizeof(canonicalName));
@@ -1473,6 +1496,7 @@ InitCatalogRoot_HFSPlus(const hfsparams_t *dp, const HFSPlusVolumeHeader *header
 		      dp->volumeName, kDefaultVolumeNameStr);
 	}
 	CFRelease(cfstr);
+#endif
 	ckp->nodeName.length = SWAP_BE16 (ckp->nodeName.length);
 
 	unicodeBytes = sizeof(UniChar) * SWAP_BE16 (ckp->nodeName.length);
@@ -2298,7 +2322,7 @@ DivideAndRoundUp(UInt32 numerator, UInt32 denominator)
 	return quotient;
 }
 
-
+#if !LINUX
 #define __kCFUserEncodingFileName ("/.CFUserTextEncoding")
 
 static UInt32
@@ -2324,7 +2348,7 @@ GetDefaultEncoding()
     }
     return 0;
 }
-
+#endif
 
 static int
 ConvertUTF8toUnicode(const UInt8* source, size_t bufsize, UniChar* unibuf,
@@ -2391,6 +2415,9 @@ ConvertUTF8toUnicode(const UInt8* source, size_t bufsize, UniChar* unibuf,
 static int
 getencodinghint(unsigned char *name)
 {
+#if LINUX
+	return(0);
+#else
         int mib[3];
         size_t buflen = sizeof(int);
         struct vfsconf vfc;
@@ -2408,7 +2435,8 @@ getencodinghint(unsigned char *name)
 	return (hint);
 error:
 	hint = GetDefaultEncoding();
-	return (hint);
+	return (0);
+#endif
 }
 
 
@@ -2419,12 +2447,14 @@ void GenerateVolumeUUID(VolumeUUID *newVolumeID) {
 	unsigned char digest[20];
 	time_t now;
 	clock_t uptime;
-	int mib[2];
-	int sysdata;
-	char sysctlstring[128];
 	size_t datalen;
 	double sysloadavg[3];
+#if !LINUX
+	int sysdata;
+	int mib[2];
+	char sysctlstring[128];
 	struct vmtotal sysvmtotal;
+#endif
 	
 	do {
 		/* Initialize the SHA-1 context for processing: */
@@ -2437,52 +2467,58 @@ void GenerateVolumeUUID(VolumeUUID *newVolumeID) {
 		SHA1_Update(&context, &uptime, sizeof(uptime));
 		
 		/* The kernel's boot time: */
+#if !LINUX
 		mib[0] = CTL_KERN;
 		mib[1] = KERN_BOOTTIME;
 		datalen = sizeof(sysdata);
 		sysctl(mib, 2, &sysdata, &datalen, NULL, 0);
 		SHA1_Update(&context, &sysdata, datalen);
-		
+#endif
 		/* The system's host id: */
+#if !LINUX
 		mib[0] = CTL_KERN;
 		mib[1] = KERN_HOSTID;
 		datalen = sizeof(sysdata);
 		sysctl(mib, 2, &sysdata, &datalen, NULL, 0);
 		SHA1_Update(&context, &sysdata, datalen);
-
+#endif
 		/* The system's host name: */
+#if !LINUX
 		mib[0] = CTL_KERN;
 		mib[1] = KERN_HOSTNAME;
 		datalen = sizeof(sysctlstring);
 		sysctl(mib, 2, sysctlstring, &datalen, NULL, 0);
 		SHA1_Update(&context, sysctlstring, datalen);
-
+#endif
 		/* The running kernel's OS release string: */
+#if !LINUX
 		mib[0] = CTL_KERN;
 		mib[1] = KERN_OSRELEASE;
 		datalen = sizeof(sysctlstring);
 		sysctl(mib, 2, sysctlstring, &datalen, NULL, 0);
 		SHA1_Update(&context, sysctlstring, datalen);
-
+#endif
 		/* The running kernel's version string: */
+#if !LINUX
 		mib[0] = CTL_KERN;
 		mib[1] = KERN_VERSION;
 		datalen = sizeof(sysctlstring);
 		sysctl(mib, 2, sysctlstring, &datalen, NULL, 0);
 		SHA1_Update(&context, sysctlstring, datalen);
-
+#endif
 		/* The system's load average: */
 		datalen = sizeof(sysloadavg);
 		getloadavg(sysloadavg, 3);
 		SHA1_Update(&context, &sysloadavg, datalen);
 
 		/* The system's VM statistics: */
+#if !LINUX
 		mib[0] = CTL_VM;
 		mib[1] = VM_METER;
 		datalen = sizeof(sysvmtotal);
 		sysctl(mib, 2, &sysvmtotal, &datalen, NULL, 0);
 		SHA1_Update(&context, &sysvmtotal, datalen);
-
+#endif
 		/* The current GMT (26 ASCII characters): */
 		time(&now);
 		strncpy(randomInputBuffer, asctime(gmtime(&now)), 26);	/* "Mon Mar 27 13:46:26 2000" */
