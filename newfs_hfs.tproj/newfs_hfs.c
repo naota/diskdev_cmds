@@ -39,8 +39,13 @@
 #include <sys/mount.h>
 #include <sys/param.h>
 #include <sys/stat.h>
+#if LINUX
+#include <time.h>
+#endif
 
+#if !LINUX
 #include <IOKit/storage/IOMediaBSDClient.h>
+#endif
 
 #include <hfs/hfs_format.h>
 #include "newfs_hfs.h"
@@ -72,7 +77,9 @@ static void usage __P((void));
 
 char	*progname;
 char	gVolumeName[kHFSPlusMaxFileNameChars + 1] = {kDefaultVolumeNameStr};
-char	rawdevice[MAXPATHLEN];
+#if !LINUX
+char	rawdevice[MAXPATHLEN]; 
+#endif
 char	blkdevice[MAXPATHLEN];
 uint32_t gBlockSize = 0;
 UInt32	gNextCNID = kHFSFirstUserCatalogNodeID;
@@ -155,8 +162,10 @@ main(argc, argv)
 	extern char *optarg;
 	extern int optind;
 	int ch;
+#if !LINUX
 	char *cp, *special;
 	struct statfs *mp;
+#endif
 	int n;
 	
 	if ((progname = strrchr(*argv, '/')))
@@ -272,6 +281,9 @@ main(argc, argv)
 		if (argc != 1)
 			usage();
 
+#if LINUX
+		(void) sprintf(blkdevice, "%s", argv[0]);
+#else
 		special = argv[0];
 		cp = strrchr(special, '/');
 		if (cp != 0)
@@ -280,6 +292,7 @@ main(argc, argv)
 			special++;
 		(void) snprintf(rawdevice, sizeof(rawdevice), "%sr%s", _PATH_DEV, special);
 		(void) snprintf(blkdevice, sizeof(blkdevice), "%s%s", _PATH_DEV, special);
+#endif
 	}
 
 	if (gPartitionSize == 0) {
@@ -297,7 +310,7 @@ main(argc, argv)
 		}
 	}
 
-	if (hfs_newfs(rawdevice) < 0) {
+	if (hfs_newfs(blkdevice) < 0) {
 		err(1, "cannot create filesystem on %s", rawdevice);
 	}
 
@@ -470,7 +483,7 @@ static void validate_hfsplus_block_size(UInt64 sectorCount, UInt32 sectorSize)
 			fatal("%s: block size is too small for %lld sectors", optarg, gBlockSize, sectorCount);
 
 		if (gBlockSize < HFSOPTIMALBLKSIZE)
-			warnx("Warning: %ld is a non-optimal block size (4096 would be a better choice)", gBlockSize);
+			warnx("Warning: %i is a non-optimal block size (4096 would be a better choice)", gBlockSize);
 	}
 }
 
@@ -516,9 +529,36 @@ hfs_newfs(char *device)
 		if ((dip.physSectorSize % kBytesPerSector) != 0)
 			fatal("%d is an unsupported sector size\n", dip.physSectorSize);
 
+#if LINUX
+		dip.sectorSize = 512;
+		dip.sectorsPerIO = 256;
+ 
+#ifndef	BLKGETSIZE
+#define	BLKGETSIZE		_IO(0x12,96)
+#endif
+#ifndef	BLKGETSIZE64
+#define BLKGETSIZE64		_IOR(0x12,114,size_t)
+#endif
+        
+		if (S_ISREG(stbuf.st_mode)) {
+		  dip.totalSectors = stbuf.st_size / 512;
+		} 
+		else if (S_ISBLK(stbuf.st_mode)) {
+		  unsigned long size;
+		  u_int64_t size64;
+		  if (!ioctl(fso, BLKGETSIZE64, &size64))
+		    dip.totalSectors = size64 / 512;
+		  else if (!ioctl(fso, BLKGETSIZE, &size))
+		    dip.totalSectors = size;
+		  else
+		    fatal("%s: %s", device, strerror(errno));
+		} 
+		else
+		  fatal("%s: is not a block device", device);
+#else
 		if (ioctl(fso, DKIOCGETBLOCKCOUNT, &dip.physTotalSectors) < 0)
-			fatal("%s: %s", device, strerror(errno));
-
+		  fatal("%s: %s", device, strerror(errno));
+#endif
 	}
 
 	dip.physSectorsPerIO = (1024 * 1024) / dip.physSectorSize;  /* use 1M as default */
@@ -714,7 +754,7 @@ static void hfsplus_params (const DriveInfo* dip, hfsparams_t *defaults)
 	defaults->catalogClumpSize = clumpSize;
 	defaults->catalogNodeSize = catnodesiz;
 	if (gBlockSize < 4096 && gBlockSize < catnodesiz)
-		warnx("Warning: block size %ld is less than catalog b-tree node size %ld", gBlockSize, catnodesiz);
+		warnx("Warning: block size %i is less than catalog b-tree node size %i", gBlockSize, catnodesiz);
 
 	if (extclumpblks == 0) {
 		clumpSize = CalcHFSPlusBTreeClumpSize(gBlockSize, extnodesiz, sectorCount, kHFSExtentsFileID);
@@ -727,7 +767,7 @@ static void hfsplus_params (const DriveInfo* dip, hfsparams_t *defaults)
 	defaults->extentsClumpSize = clumpSize;
 	defaults->extentsNodeSize = extnodesiz;
 	if (gBlockSize < extnodesiz)
-		warnx("Warning: block size %ld is less than extents b-tree node size %ld", gBlockSize, extnodesiz);
+		warnx("Warning: block size %i is less than extents b-tree node size %i", gBlockSize, extnodesiz);
 
 	if (atrclumpblks == 0) {
 		if (gUserAttrSize) {

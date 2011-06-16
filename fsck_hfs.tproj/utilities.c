@@ -186,12 +186,14 @@ retry:
 			plog("Can't stat %s\n", raw);
 			return (origname);
 		}
+#if !LINUX
 		if ((stchar.st_mode & S_IFMT) == S_IFCHR) {
 			return (raw);
 		} else {
 			plog("%s is not a character device\n", raw);
 			return (origname);
 		}
+#endif
 	} else if ((stblock.st_mode & S_IFMT) == S_IFCHR && !retried) {
 		newname = unrawname(newname);
 		retried++;
@@ -217,7 +219,11 @@ rawname(char *name)
 	*dp = 0;
 	(void)strlcpy(rawbuf, name, sizeof(rawbuf));
 	*dp = '/';
+#if LINUX
+	(void)strlcat(rawbuf, "/", sizeof(rawbuf));
+#else
 	(void)strlcat(rawbuf, "/r", sizeof(rawbuf));
+#endif
 	(void)strlcat(rawbuf, &dp[1], sizeof(rawbuf));
 
 	return (rawbuf);

@@ -195,7 +195,7 @@ hfs_swap_BTNode (
     BTNodeDescriptor *srcDesc = src->buffer;
     BTreeControlBlockPtr btcb = fcb->fcbBtree;
     UInt16 *srcOffs = NULL;
-    UInt32 i;
+    int i;
     int error = 0;
 
 //			WriteError(fcb->fcbVolume->vcbGPtr, E_BadNode, fcb->fcbFileID, src->blockNum);
@@ -560,7 +560,7 @@ hfs_swap_HFSPlusBTInternalNode (
             /* Make sure name length is consistent with key length */
             if (keyLength < sizeof(srcKey->parentID) + sizeof(srcKey->nodeName.length) +
                 srcKey->nodeName.length*sizeof(srcKey->nodeName.unicode[0])) {
-				if (debug) plog("hfs_swap_HFSPlusBTInternalNode: catalog record #%d keyLength=%d expected=%lu\n",
+				if (debug) plog("hfs_swap_HFSPlusBTInternalNode: catalog record #%d keyLength=%d expected=%i\n",
 					srcDesc->numRecords-i, keyLength, sizeof(srcKey->parentID) + sizeof(srcKey->nodeName.length) +
                     srcKey->nodeName.length*sizeof(srcKey->nodeName.unicode[0]));
 				WriteError(fcb->fcbVolume->vcbGPtr, E_KeyLen, fcb->fcbFileID, src->blockNum);

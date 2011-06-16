@@ -40,11 +40,16 @@
 #include "../fsck_hfs.h"
 
 #include <assert.h>
+#if LINUX
+#define XATTR_MAXNAMELEN 127
+#include <limits.h>
+#else
 #include <sys/xattr.h>
 #include <sys/acl.h>
 #include <sys/kauth.h>
-#include <sys/errno.h>
 #include <sys/syslimits.h>
+#endif
+#include <sys/errno.h>
 #include <sys/param.h>
 #include <sys/sysctl.h>
 #include <sys/mount.h>
@@ -1433,6 +1438,10 @@ void dumpblocklist(SGlobPtr GPtr);
 
 #ifdef __cplusplus
 };
+#endif
+
+#if LINUX
+#undef XATTR_MAXNAMELEN
 #endif
 
 #endif /* __SCAVENGER__ */
