@@ -136,7 +136,9 @@ static UInt32 Largest __P((UInt32 a, UInt32 b, UInt32 c, UInt32 d ));
 static void MarkBitInAllocationBuffer __P((HFSPlusVolumeHeader *header,
 		UInt32 allocationBlock, void* sectorBuffer, UInt32 *sector));
 
+#if !LINUX
 static UInt32 GetDefaultEncoding();
+#endif
 
 static UInt32 UTCToLocal __P((UInt32 utcTime));
 
@@ -1930,7 +1932,7 @@ DivideAndRoundUp(UInt32 numerator, UInt32 denominator)
 	return quotient;
 }
 
-
+#if !LINUX
 #define __kCFUserEncodingFileName ("/.CFUserTextEncoding")
 
 static UInt32
@@ -1956,7 +1958,7 @@ GetDefaultEncoding()
     }
     return 0;
 }
-
+#endif
 
 static int
 ConvertUTF8toUnicode(const UInt8* source, UInt32 bufsize, UniChar* unibuf,
