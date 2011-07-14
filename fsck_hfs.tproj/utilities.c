@@ -216,7 +216,11 @@ rawname(char *name)
 	*dp = 0;
 	(void)strcpy(rawbuf, name);
 	*dp = '/';
-	(void)strcat(rawbuf, "/r");
+#if LINUX
+	(void)strcat(rawbuf, "/");
+#else
+	(void)strcat(rawbuf,"/r");
+#endif
 	(void)strcat(rawbuf, &dp[1]);
 
 	return (rawbuf);

@@ -78,7 +78,9 @@ static void usage __P((void));
 
 char	*progname;
 char	gVolumeName[kHFSPlusMaxFileNameChars + 1] = {kDefaultVolumeNameStr};
-char	rawdevice[MAXPATHLEN];
+#if !LINUX
+char	rawdevice[MAXPATHLEN]; 
+#endif
 char	blkdevice[MAXPATHLEN];
 UInt32	gBlockSize = 0;
 UInt32	gNextCNID = kHFSFirstUserCatalogNodeID;
@@ -142,8 +144,10 @@ main(argc, argv)
 	extern int optind;
 	int ch;
 	int forceHFS;
+#if !LINUX
 	char *cp, *special;
 	struct statfs *mp;
+#endif
 	int n;
 	
 	if ((progname = strrchr(*argv, '/')))
@@ -243,7 +247,9 @@ main(argc, argv)
 
 	if (argc != 1)
 		usage();
-
+#if LINUX
+	(void) sprintf(blkdevice, "%s", argv[0]);
+#else
 	special = argv[0];
 	cp = strrchr(special, '/');
 	if (cp != 0)
@@ -252,6 +258,7 @@ main(argc, argv)
 		special++;
 	(void) sprintf(rawdevice, "%sr%s", _PATH_DEV, special);
 	(void) sprintf(blkdevice, "%s%s", _PATH_DEV, special);
+#endif
 
 	if (forceHFS && gJournaled) {
 		fprintf(stderr, "-h -J: incompatible options specified\n");
@@ -287,13 +294,17 @@ main(argc, argv)
 	}
 #endif
 
-	if (hfs_newfs(rawdevice, forceHFS, true) < 0) {
+	if (hfs_newfs(blkdevice, forceHFS, true) < 0) {
+#if LINUX
+		err(1, NULL);
+#else
 		/* On ENXIO error use the block device (to get de-blocking) */
 		if (errno == ENXIO) {
 			if (hfs_newfs(blkdevice, forceHFS, false) < 0)
 				err(1, NULL);
 		} else
 			err(1, NULL);
+#endif
 	}
 
 	exit(0);
