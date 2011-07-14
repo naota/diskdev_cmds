@@ -31,10 +31,16 @@
 #include <sys/param.h>
 #include <sys/types.h>
 #include <sys/time.h>
+#if LINUX
+#include <time.h>
+#include "missing.h"
+#endif
 #include <sys/errno.h>
 #include <sys/stat.h>
 #include <sys/sysctl.h>
+#if !LINUX
 #include <sys/vmmeter.h>
+#endif
 
 #include <err.h>
 #include <errno.h>
@@ -47,13 +53,14 @@
 
 #include <openssl/sha.h>
 
+#if !LINUX
 #include <architecture/byte_order.h>
 
 #include <CoreFoundation/CFString.h>
 #include <CoreFoundation/CFStringEncodingExt.h>
 
 extern Boolean _CFStringGetFileSystemRepresentation(CFStringRef string, UInt8 *buffer, CFIndex maxBufLen);
-
+#endif
 
 #include <hfs/hfs_format.h>
 #include <hfs/hfs_mount.h>

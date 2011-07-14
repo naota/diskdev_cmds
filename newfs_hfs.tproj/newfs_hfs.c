@@ -38,8 +38,13 @@
 #include <sys/mount.h>
 #include <sys/param.h>
 #include <sys/stat.h>
+#if LINUX
+#include <time.h>
+#endif
 
+#if !LINUX
 #include <IOKit/storage/IOMediaBSDClient.h>
+#endif
 
 #include <hfs/hfs_format.h>
 #include "newfs_hfs.h"

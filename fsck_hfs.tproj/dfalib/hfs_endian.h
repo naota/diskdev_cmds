@@ -27,9 +27,14 @@
  *
  * This file prototypes endian swapping routines for the HFS/HFS Plus
  * volume format.
- */
+*/
 #include <hfs/hfs_format.h>
+#if LINUX
+#include <endian.h>
+#include <byteswap.h>
+#else
 #include <architecture/byte_order.h>
+#endif
 #include "SRuntime.h"
 
 /*********************/

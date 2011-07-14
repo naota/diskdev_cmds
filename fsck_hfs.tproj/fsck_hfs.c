@@ -24,10 +24,14 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/param.h>
+#if !LINUX
 #include <sys/ucred.h>
+#endif
 #include <sys/mount.h>
 #include <sys/ioctl.h>
+#if !LINUX
 #include <sys/disk.h>
+#endif
 
 #include <hfs/hfs_mount.h>
 

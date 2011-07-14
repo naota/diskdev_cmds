@@ -20,6 +20,9 @@
  * @APPLE_LICENSE_HEADER_END@
  */
 
+#if LINUX
+#include "missing.h"
+#endif
 #include "SRuntime.h"
 #include "Scavenger.h"
 #include "../cache.h"

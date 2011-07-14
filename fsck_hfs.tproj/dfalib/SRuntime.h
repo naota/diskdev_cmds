@@ -27,8 +27,11 @@
 #define __SRUNTIME__
 
 #if BSD
-
+#if LINUX
+#include "missing.h"
+#else
 #include <sys/types.h>
+#endif
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>

@@ -19,8 +19,12 @@
  * 
  * @APPLE_LICENSE_HEADER_END@
  */
- 
-#include <CoreFoundation/CFBase.h>
+
+#if LINUX
+#include "missing.h"
+#else
+#include <CoreFoundation/CFBase.h>*/
+#endif
 
 /*
  * Mac OS Finder flags

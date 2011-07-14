@@ -30,7 +30,12 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+#if LINUX
+#include "missing.h"
+#else
 #include <architecture/byte_order.h>
+#endif
+
 #include <hfs/hfs_format.h>
 
 #include "hfs_endian.h"
