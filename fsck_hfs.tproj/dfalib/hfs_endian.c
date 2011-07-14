@@ -198,7 +198,7 @@ hfs_swap_BTNode (
     BTNodeDescriptor *srcDesc = src->buffer;
     BTreeControlBlockPtr btcb = fcb->fcbBtree;
     UInt16 *srcOffs = NULL;
-    UInt32 i;
+    int i;
     int error = 0;
 
 //			WriteError(fcb->fcbVolume->vcbGPtr, E_BadNode, fcb->fcbFileID, src->blockNum);
@@ -437,7 +437,7 @@ hfs_swap_HFSPlusBTInternalNode (
     BTNodeDescriptor *srcDesc = src->buffer;
     UInt16 *srcOffs = (UInt16 *)((char *)src->buffer + (src->blockSize - (srcDesc->numRecords * sizeof (UInt16))));
 	char *nextRecord;	/*  Points to start of record following current one */
-    UInt32 i;
+    int i;
     UInt32 j;
 
     if (fileID == kHFSExtentsFileID) {
@@ -858,7 +858,7 @@ hfs_swap_HFSBTInternalNode (
     UInt16 *srcOffs = (UInt16 *)((char *)src->buffer + (src->blockSize - (srcDesc->numRecords * sizeof (UInt16))));
 	char *nextRecord;	/*  Points to start of record following current one */
 
-    UInt32 i;
+    int i;
     UInt32 j;
 
     if (fileID == kHFSExtentsFileID) {
