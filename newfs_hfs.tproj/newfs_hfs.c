@@ -492,7 +492,9 @@ hfs_newfs(char *device, int forceHFS, int isRaw)
 	int fso = 0;
 	int retval = 0;
 	hfsparams_t defaults = {0};
+#if !LINUX
 	u_int64_t maxSectorsPerIO;
+#endif
 
 	if (gNoCreate) {
 		fso = open( device, O_RDONLY | O_NDELAY, 0 );
@@ -505,7 +507,33 @@ hfs_newfs(char *device, int forceHFS, int isRaw)
 
 	if (fstat( fso, &stbuf) < 0)
 		fatal("%s: %s", device, strerror(errno));
+#if LINUX
+	dip.sectorSize = 512;
+	dip.sectorsPerIO = 256;
 
+#ifndef	BLKGETSIZE
+#define	BLKGETSIZE		_IO(0x12,96)
+#endif
+#ifndef	BLKGETSIZE64
+#define BLKGETSIZE64		_IOR(0x12,114,size_t)
+#endif
+        
+	if (S_ISREG(stbuf.st_mode)) {
+                dip.totalSectors = stbuf.st_size / 512;
+        } 
+	else if (S_ISBLK(stbuf.st_mode)) {
+                unsigned long size;
+                u_int64_t size64;
+                if (!ioctl(fso, BLKGETSIZE64, &size64))
+                        dip.totalSectors = size64 / 512;
+                else if (!ioctl(fso, BLKGETSIZE, &size))
+                        dip.totalSectors = size;
+                else
+                        fatal("%s: %s", device, strerror(errno));
+        } 
+	else
+                fatal("%s: is not a block device", device);
+#else
 	if (ioctl(fso, DKIOCGETBLOCKCOUNT, &dip.totalSectors) < 0)
 		fatal("%s: %s", device, strerror(errno));
 
@@ -513,14 +541,17 @@ hfs_newfs(char *device, int forceHFS, int isRaw)
 		fatal("%s: %s", device, strerror(errno));
 
 	if (ioctl(fso, DKIOCGETMAXBLOCKCOUNTWRITE, &maxSectorsPerIO) < 0)
-		dip.sectorsPerIO = (128 * 1024) / dip.sectorSize;  /* use 128K as default */
+		dip.sectorsPerIO = (128 * 1024) / dip.sectorSize; /* use 128K as default */
 	else
 		dip.sectorsPerIO = MIN(maxSectorsPerIO, (1024 * 1024) / dip.sectorSize);
+#endif
+	
         /*
-         * The make_hfs code currentlydoes 512 byte sized I/O.
+         * The make_hfs code currently does 512 byte sized I/O.
          * If the sector size is bigger than 512, start over
          * using the block device (to get de-blocking).
          */       
+#if !LINUX
         if (dip.sectorSize != kBytesPerSector) {
 		if (isRaw) {
 			close(fso);
@@ -535,7 +566,8 @@ hfs_newfs(char *device, int forceHFS, int isRaw)
 			dip.sectorSize = kBytesPerSector;
 		}
         }
-  
+#endif
+
 	dip.fd = fso;
 	dip.sectorOffset = 0;
 	time(&createtime);
