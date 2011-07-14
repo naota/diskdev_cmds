@@ -126,33 +126,33 @@ enum {
 #define kDTDF_FileID	16
 #define kDTDF_Name	"Desktop DF"
 #define kDTDF_Chars	10
-#define kDTDF_Type	'DTFL'
-#define kDTDF_Creator	'DMGR'
+#define kDTDF_Type	0x4454464C /* 'DTFL' */
+#define kDTDF_Creator	0x444D4752 /* 'DMGR' */
 
 #define kDTDB_FileID	17
 #define kDTDB_Name	"Desktop DB"
 #define kDTDB_Chars	10
-#define kDTDB_Type	'BTFL'
-#define kDTDB_Creator	'DMGR'
+#define kDTDB_Type	0x4254464C /* 'BTFL' */
+#define kDTDB_Creator	0x444D4752 /* 'DMGR' */
 #define kDTDB_Size	1024
 
 #define kReadMe_FileID	18
 #define kReadMe_Name	"ReadMe"
 #define kReadMe_Chars	6
-#define kReadMe_Type	'ttro'
-#define kReadMe_Creator	'ttxt'
+#define kReadMe_Type	0x7474726F /* 'ttro' */
+#define kReadMe_Creator	0x74747974 /* 'ttxt' */
 
 #define kFinder_FileID	19
 #define kFinder_Name	"Finder"
 #define kFinder_Chars	6
-#define kFinder_Type	'FNDR'
-#define kFinder_Creator	'MACS'
+#define kFinder_Type	0x464E4452 /* 'FNDR' */
+#define kFinder_Creator	0x4D414353 /* 'MACS' */
 
 #define kSystem_FileID	20
 #define kSystem_Name	"System"
 #define kSystem_Chars	6
-#define kSystem_Type	'zsys'
-#define kSystem_Creator	'MACS'
+#define kSystem_Type	0x7A737973 /* 'zsys' */
+#define kSystem_Creator	0x4D414353 /* 'MACS' */
 
 
 
