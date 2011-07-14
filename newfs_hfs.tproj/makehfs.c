@@ -1141,7 +1141,9 @@ InitCatalogRoot_HFSPlus(const hfsparams_t *dp, const HFSPlusVolumeHeader *header
 	 * First record is always the root directory...
 	 */
 	ckp = (HFSPlusCatalogKey *)((UInt8 *)buffer + offset);
-	
+#if LINUX	
+	ConvertUTF8toUnicode(dp->volumeName, sizeof(ckp->nodeName.unicode), ckp->nodeName.unicode, &ckp->nodeName.length);
+#else
 	/* Use CFString functions to get a HFSPlus Canonical name */
 	cfstr = CFStringCreateWithCString(kCFAllocatorDefault, (char *)dp->volumeName, kCFStringEncodingUTF8);
 	cfOK = _CFStringGetFileSystemRepresentation(cfstr, canonicalName, sizeof(canonicalName));
@@ -1158,6 +1160,7 @@ InitCatalogRoot_HFSPlus(const hfsparams_t *dp, const HFSPlusVolumeHeader *header
 		      dp->volumeName, kDefaultVolumeNameStr);
 	}
 	CFRelease(cfstr);
+#endif
 	ckp->nodeName.length = SWAP_BE16 (ckp->nodeName.length);
 
 	unicodeBytes = sizeof(UniChar) * SWAP_BE16 (ckp->nodeName.length);
@@ -2025,6 +2028,9 @@ ConvertUTF8toUnicode(const UInt8* source, UInt32 bufsize, UniChar* unibuf,
 static int
 getencodinghint(unsigned char *name)
 {
+#if LINUX
+	return(0);
+#else
         int mib[3];
         size_t buflen = sizeof(int);
         struct vfsconf vfc;
@@ -2042,7 +2048,8 @@ getencodinghint(unsigned char *name)
 	return (hint);
 error:
 	hint = GetDefaultEncoding();
-	return (hint);
+	return (0);
+#endif
 }
 
 
