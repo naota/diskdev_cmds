@@ -70,7 +70,7 @@ extern Boolean _CFStringGetFileSystemRepresentation(CFStringRef string, UInt8 *b
 #include "readme.h"
 
 
-#define HFS_BOOT_DATA	"/usr/share/misc/hfsbootdata"
+#define HFS_BOOT_DATA	"/usr/share/hfsprogs/hfsbootdata"
 
 #define HFS_JOURNAL_FILE	".journal"
 #define HFS_JOURNAL_INFO	".journal_info_block"
