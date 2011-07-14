@@ -344,13 +344,18 @@ checkfilesys(char * filesys)
 	/* XXX free any allocated memory here */
 
 	if (hotroot && fsmodified) {
+#if !LINUX
 		struct hfs_mount_args args;
+#endif
 		/*
 		 * We modified the root.  Do a mount update on
 		 * it, unless it is read-write, so we can continue.
 		 */
 		if (!preen)
 			printf("\n***** FILE SYSTEM WAS MODIFIED *****\n");
+#if LINUX
+		// FIXME
+#else
 		if (flags & MNT_RDONLY) {		
 			bzero(&args, sizeof(args));
 			flags |= MNT_UPDATE | MNT_RELOAD;
@@ -359,6 +364,7 @@ checkfilesys(char * filesys)
 				goto ExitThisRoutine;
 			}
 		}
+#endif
 		if (!preen)
 			printf("\n***** REBOOT NOW *****\n");
 		sync();
