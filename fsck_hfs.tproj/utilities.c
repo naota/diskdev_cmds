@@ -183,12 +183,14 @@ retry:
 			printf("Can't stat %s\n", raw);
 			return (origname);
 		}
+#if !LINUX
 		if ((stchar.st_mode & S_IFMT) == S_IFCHR) {
 			return (raw);
 		} else {
 			printf("%s is not a character device\n", raw);
 			return (origname);
 		}
+#endif
 	} else if ((stblock.st_mode & S_IFMT) == S_IFCHR && !retried) {
 		newname = unrawname(newname);
 		retried++;

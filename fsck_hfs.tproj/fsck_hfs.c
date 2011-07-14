@@ -410,11 +410,13 @@ setup( char *dev, int *blockDevice_fdPtr, int *canWritePtr )
 		printf("Can't stat %s: %s\n", dev, strerror(errno));
 		return (0);
 	}
+#if !LINUX
 	if ((statb.st_mode & S_IFMT) != S_IFCHR) {
 		pfatal("%s is not a character device", dev);
 		if (reply("CONTINUE") == 0)
 			return (0);
 	}
+#endif
 	if ((fsreadfd = open(dev, O_RDONLY)) < 0) {
 		printf("Can't open %s: %s\n", dev, strerror(errno));
 		return (0);
