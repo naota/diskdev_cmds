@@ -110,7 +110,7 @@ main(argc, argv)
 	else
 		progname = *argv;
 
-	while ((ch = getopt(argc, argv, "D:dfglm:npqruy")) != EOF) {
+	while ((ch = getopt(argc, argv, "D:dfglm:napqruy")) != EOF) {
 		switch (ch) {
 		case 'd':
 			debug++;
@@ -154,6 +154,7 @@ main(argc, argv)
 			yflag = 0;
 			break;
 
+		case 'a':
 		case 'p':
 			preen++;
 			break;
@@ -517,7 +518,7 @@ usage()
 	(void) fprintf(stderr, "  l = live fsck (lock down and test-only)\n");
 	(void) fprintf(stderr, "  m arg = octal mode used when creating lost+found directory \n");
 	(void) fprintf(stderr, "  n = assume a no response \n");
-	(void) fprintf(stderr, "  p = just fix normal inconsistencies \n");
+	(void) fprintf(stderr, "  p, a = just fix normal inconsistencies \n");
 	(void) fprintf(stderr, "  q = quick check returns clean, dirty, or failure \n");
 	(void) fprintf(stderr, "  r = rebuild catalog btree \n");
 	(void) fprintf(stderr, "  u = usage \n");
