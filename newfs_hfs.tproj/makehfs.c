@@ -1828,15 +1828,15 @@ WriteBuffer(const DriveInfo *driveInfo, UInt64 startingSector, UInt32 byteCount,
 	off_t sector;
 
 	if ((byteCount % driveInfo->sectorSize) != 0)
-		errx(1, "WriteBuffer: byte count %ld is not sector size multiple", byteCount);
+		errx(1, "WriteBuffer: byte count %i is not sector size multiple", byteCount);
 
 	sector = driveInfo->sectorOffset + startingSector;
 
 	if (lseek(driveInfo->fd, sector * driveInfo->sectorSize, SEEK_SET) < 0)
-		err(1, "seek (sector %qd)", sector);
+		err(1, "seek (sector %lld)", sector);
 
 	if (write(driveInfo->fd, buffer, byteCount) != byteCount)
-		err(1, "write (sector %qd, %ld bytes)", sector, byteCount);
+		err(1, "write (sector %lld, %i bytes)", sector, byteCount);
 }
 
 

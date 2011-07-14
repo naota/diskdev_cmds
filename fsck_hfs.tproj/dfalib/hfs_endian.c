@@ -563,7 +563,7 @@ hfs_swap_HFSPlusBTInternalNode (
             /* Make sure name length is consistent with key length */
             if (keyLength < sizeof(srcKey->parentID) + sizeof(srcKey->nodeName.length) +
                 srcKey->nodeName.length*sizeof(srcKey->nodeName.unicode[0])) {
-				if (debug) printf("hfs_swap_HFSPlusBTInternalNode: catalog record #%d keyLength=%d expected=%lu\n",
+				if (debug) printf("hfs_swap_HFSPlusBTInternalNode: catalog record #%d keyLength=%d expected=%i\n",
 					srcDesc->numRecords-i, keyLength, sizeof(srcKey->parentID) + sizeof(srcKey->nodeName.length) +
                     srcKey->nodeName.length*sizeof(srcKey->nodeName.unicode[0]));
 				WriteError(fcb->fcbVolume->vcbGPtr, E_KeyLen, fcb->fcbFileID, src->blockNum);

@@ -463,7 +463,7 @@ static void validate_hfsplus_block_size(UInt64 sectorCount, UInt32 sectorSize)
 			fatal("%s: block size is too small for %lld sectors", optarg, gBlockSize, sectorCount);
 
 		if (gBlockSize < HFSOPTIMALBLKSIZE)
-			warnx("Warning: %ld is a non-optimal block size (4096 would be a better choice)", gBlockSize);
+			warnx("Warning: %i is a non-optimal block size (4096 would be a better choice)", gBlockSize);
 	}
 }
 
@@ -698,7 +698,7 @@ static void hfsplus_params (UInt64 sectorCount, UInt32 sectorSize, hfsparams_t *
 	defaults->catalogClumpSize = clumpSize;
 	defaults->catalogNodeSize = catnodesiz;
 	if (gBlockSize < 4096 && gBlockSize < catnodesiz)
-		warnx("Warning: block size %ld is less than catalog b-tree node size %ld", gBlockSize, catnodesiz);
+		warnx("Warning: block size %i is less than catalog b-tree node size %i", gBlockSize, catnodesiz);
 
 	if (extclumpblks == 0) {
 		clumpSize = CalcHFSPlusBTreeClumpSize(gBlockSize, extnodesiz, sectorCount, FALSE);
@@ -711,7 +711,7 @@ static void hfsplus_params (UInt64 sectorCount, UInt32 sectorSize, hfsparams_t *
 	defaults->extentsClumpSize = clumpSize;
 	defaults->extentsNodeSize = extnodesiz;
 	if (gBlockSize < extnodesiz)
-		warnx("Warning: block size %ld is less than extents b-tree node size %ld", gBlockSize, extnodesiz);
+		warnx("Warning: block size %i is less than extents b-tree node size %i", gBlockSize, extnodesiz);
 
 	if (atrclumpblks == 0) {
 		clumpSize = 0;
@@ -759,22 +759,22 @@ static void hfsplus_params (UInt64 sectorCount, UInt32 sectorSize, hfsparams_t *
 
 	if (gNoCreate) {
 		if (!gWrapper)
-			printf("%qd sectors (%lu bytes per sector)\n", sectorCount, sectorSize);
+			printf("%lld sectors (%u bytes per sector)\n", sectorCount, sectorSize);
 		printf("HFS Plus format parameters:\n");
 		printf("\tvolume name: \"%s\"\n", gVolumeName);
-		printf("\tblock-size: %lu\n", defaults->blockSize);
-		printf("\ttotal blocks: %lu\n", totalBlocks);
+		printf("\tblock-size: %u\n", defaults->blockSize);
+		printf("\ttotal blocks: %u\n", totalBlocks);
 		if (gJournaled)
 			printf("\tjournal-size: %dk\n", (int)defaults->journalSize/1024);
-		printf("\tfirst free catalog node id: %lu\n", defaults->nextFreeFileID);
-		printf("\tcatalog b-tree node size: %lu\n", defaults->catalogNodeSize);
-		printf("\tinitial catalog file size: %lu\n", defaults->catalogClumpSize);
-		printf("\textents b-tree node size: %lu\n", defaults->extentsNodeSize);
-		printf("\tinitial extents file size: %lu\n", defaults->extentsClumpSize);
-		printf("\tinitial allocation file size: %lu (%lu blocks)\n",
+		printf("\tfirst free catalog node id: %u\n", defaults->nextFreeFileID);
+		printf("\tcatalog b-tree node size: %u\n", defaults->catalogNodeSize);
+		printf("\tinitial catalog file size: %u\n", defaults->catalogClumpSize);
+		printf("\textents b-tree node size: %u\n", defaults->extentsNodeSize);
+		printf("\tinitial extents file size: %u\n", defaults->extentsClumpSize);
+		printf("\tinitial allocation file size: %u (%u blocks)\n",
 			defaults->allocationClumpSize, defaults->allocationClumpSize / gBlockSize);
-		printf("\tdata fork clump size: %lu\n", defaults->dataClumpSize);
-		printf("\tresource fork clump size: %lu\n", defaults->rsrcClumpSize);
+		printf("\tdata fork clump size: %u\n", defaults->dataClumpSize);
+		printf("\tresource fork clump size: %u\n", defaults->rsrcClumpSize);
 		if (defaults->flags & kUseAccessPerms) {
 			printf("\tuser ID: %d\n", (int)defaults->owner);
 			printf("\tgroup ID: %d\n", (int)defaults->group);
@@ -849,17 +849,17 @@ static void hfs_params(UInt32 sectorCount, UInt32 sectorSize, hfsparams_t *defau
 	}
 	
 	if (gNoCreate) {
-		printf("%ld sectors at %ld bytes per sector\n", sectorCount, sectorSize);
+		printf("%i sectors at %i bytes per sector\n", sectorCount, sectorSize);
 		printf("%s format parameters:\n", gWrapper ? "HFS Wrapper" : "HFS");
 		printf("\tvolume name: \"%s\"\n", gVolumeName);
-		printf("\tblock-size: %ld\n", defaults->blockSize);
-		printf("\ttotal blocks: %ld\n", sectorCount / (alBlkSize / sectorSize) );
-		printf("\tfirst free catalog node id: %ld\n", defaults->nextFreeFileID);
-		printf("\tinitial catalog file size: %ld\n", defaults->catalogClumpSize);
-		printf("\tinitial extents file size: %ld\n", defaults->extentsClumpSize);
-		printf("\tfile clump size: %ld\n", defaults->dataClumpSize);
+		printf("\tblock-size: %i\n", defaults->blockSize);
+		printf("\ttotal blocks: %i\n", sectorCount / (alBlkSize / sectorSize) );
+		printf("\tfirst free catalog node id: %i\n", defaults->nextFreeFileID);
+		printf("\tinitial catalog file size: %i\n", defaults->catalogClumpSize);
+		printf("\tinitial extents file size: %i\n", defaults->extentsClumpSize);
+		printf("\tfile clump size: %i\n", defaults->dataClumpSize);
 		if (hfsgrowblks)
-			printf("\twrapper growable from %ld to %ld sectors\n", sectorCount, hfsgrowblks);
+			printf("\twrapper growable from %i to %i sectors\n", sectorCount, hfsgrowblks);
 	}
 }
 
