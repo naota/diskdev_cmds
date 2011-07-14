@@ -2043,12 +2043,14 @@ void GenerateVolumeUUID(VolumeUUID *newVolumeID) {
 	unsigned char digest[20];
 	time_t now;
 	clock_t uptime;
-	int mib[2];
-	int sysdata;
-	char sysctlstring[128];
 	size_t datalen;
 	double sysloadavg[3];
+#if !LINUX
+	int sysdata;
+	int mib[2];
+	char sysctlstring[128];
 	struct vmtotal sysvmtotal;
+#endif
 	
 	do {
 		/* Initialize the SHA-1 context for processing: */
@@ -2061,52 +2063,58 @@ void GenerateVolumeUUID(VolumeUUID *newVolumeID) {
 		SHA1_Update(&context, &uptime, sizeof(uptime));
 		
 		/* The kernel's boot time: */
+#if !LINUX
 		mib[0] = CTL_KERN;
 		mib[1] = KERN_BOOTTIME;
 		datalen = sizeof(sysdata);
 		sysctl(mib, 2, &sysdata, &datalen, NULL, 0);
 		SHA1_Update(&context, &sysdata, datalen);
-		
+#endif
 		/* The system's host id: */
+#if !LINUX
 		mib[0] = CTL_KERN;
 		mib[1] = KERN_HOSTID;
 		datalen = sizeof(sysdata);
 		sysctl(mib, 2, &sysdata, &datalen, NULL, 0);
 		SHA1_Update(&context, &sysdata, datalen);
-
+#endif
 		/* The system's host name: */
+#if !LINUX
 		mib[0] = CTL_KERN;
 		mib[1] = KERN_HOSTNAME;
 		datalen = sizeof(sysctlstring);
 		sysctl(mib, 2, sysctlstring, &datalen, NULL, 0);
 		SHA1_Update(&context, sysctlstring, datalen);
-
+#endif
 		/* The running kernel's OS release string: */
+#if !LINUX
 		mib[0] = CTL_KERN;
 		mib[1] = KERN_OSRELEASE;
 		datalen = sizeof(sysctlstring);
 		sysctl(mib, 2, sysctlstring, &datalen, NULL, 0);
 		SHA1_Update(&context, sysctlstring, datalen);
-
+#endif
 		/* The running kernel's version string: */
+#if !LINUX
 		mib[0] = CTL_KERN;
 		mib[1] = KERN_VERSION;
 		datalen = sizeof(sysctlstring);
 		sysctl(mib, 2, sysctlstring, &datalen, NULL, 0);
 		SHA1_Update(&context, sysctlstring, datalen);
-
+#endif
 		/* The system's load average: */
 		datalen = sizeof(sysloadavg);
 		getloadavg(sysloadavg, 3);
 		SHA1_Update(&context, &sysloadavg, datalen);
 
 		/* The system's VM statistics: */
+#if !LINUX
 		mib[0] = CTL_VM;
 		mib[1] = VM_METER;
 		datalen = sizeof(sysvmtotal);
 		sysctl(mib, 2, &sysvmtotal, &datalen, NULL, 0);
 		SHA1_Update(&context, &sysvmtotal, datalen);
-
+#endif
 		/* The current GMT (26 ASCII characters): */
 		time(&now);
 		strncpy(randomInputBuffer, asctime(gmtime(&now)), 26);	/* "Mon Mar 27 13:46:26 2000" */
