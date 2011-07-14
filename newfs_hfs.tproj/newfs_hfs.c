@@ -273,6 +273,9 @@ main(argc, argv)
 	/*
 	 * Check if target device is aready mounted
 	 */
+#if LINUX
+	// FIXME
+#else
 	n = getmntinfo(&mp, MNT_NOWAIT);
 	if (n == 0)
 		fatal("%s: getmntinfo: %s", blkdevice, strerror(errno));
@@ -282,6 +285,7 @@ main(argc, argv)
 			fatal("%s is mounted on %s", blkdevice, mp->f_mntonname);
 		++mp;
 	}
+#endif
 
 	if (hfs_newfs(rawdevice, forceHFS, true) < 0) {
 		/* On ENXIO error use the block device (to get de-blocking) */

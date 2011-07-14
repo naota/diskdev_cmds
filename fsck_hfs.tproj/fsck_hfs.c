@@ -210,7 +210,9 @@ checkfilesys(char * filesys)
 	int chkLev, repLev, logLev;
 	int blockDevice_fd, canWrite;
 	char *unraw, *mntonname;
+#if !LINUX
 	struct statfs *fsinfo;
+#endif
 	int fs_fd=-1;  // fd to the root-dir of the fs we're checking (only w/lfag == 1)
 
 	flags = 0;
@@ -219,7 +221,9 @@ checkfilesys(char * filesys)
 	canWrite = 0;
 	unraw = NULL;
 	mntonname = NULL;
-
+#if LINUX
+	// FIXME
+#else
 	if (lflag) {
 		result = getmntinfo(&fsinfo, MNT_NOWAIT);
 
@@ -249,7 +253,7 @@ checkfilesys(char * filesys)
 		    }
 		}
 	}
-
+#endif
 	if (debug && preen)
 		pwarn("starting\n");
 	
@@ -322,6 +326,9 @@ checkfilesys(char * filesys)
 			}
 		}
 	} else {
+#if LINUX
+	// FIXME
+#else
 		struct statfs stfs_buf;
 		/*
 		 * Check to see if root is mounted read-write.
@@ -331,6 +338,7 @@ checkfilesys(char * filesys)
 		else
 			flags = 0;
 		ckfini(flags & MNT_RDONLY);
+#endif
 	}
 
 	/* XXX free any allocated memory here */

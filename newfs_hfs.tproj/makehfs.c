@@ -1107,9 +1107,11 @@ InitCatalogRoot_HFSPlus(const hfsparams_t *dp, const HFSPlusVolumeHeader *header
 	UInt16					nodeSize;
 	SInt16					offset;
 	UInt32					unicodeBytes;
+#if !LINUX
 	UInt8 canonicalName[256];
 	CFStringRef cfstr;
 	Boolean	cfOK;
+#endif
 	int index = 0;
 
 	nodeSize = dp->catalogNodeSize;
