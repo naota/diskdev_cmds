@@ -184,10 +184,12 @@ main(argc, argv)
 	
 	if (guiControl)
 		debug = 0; /* debugging is for command line only */
-
+#if LINUX
+// FIXME
+#else
 	if (signal(SIGINT, SIG_IGN) != SIG_IGN)
 		(void)signal(SIGINT, catch);
-
+#endif
 	if (argc < 1) {
 		(void) fprintf(stderr, "%s: missing special-device\n", progname);
 		usage();
