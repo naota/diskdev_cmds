@@ -439,10 +439,14 @@ setup( char *dev, int *blockDevice_fdPtr, int *canWritePtr )
 		printf("\n");
 
 	/* Get device block size to initialize cache */
+#if LINUX
+	devBlockSize = 512;
+#else
 	if (ioctl(fsreadfd, DKIOCGETBLOCKSIZE, &devBlockSize) < 0) {
 		pfatal ("Can't get device block size\n");
 		return (0);
 	}
+#endif
 	/* Initialize the cache */
 	if (CacheInit (&fscache, fsreadfd, fswritefd, devBlockSize,
 			CACHE_IOSIZE, CACHE_BLOCKS, CACHE_HASHSIZE) != EOK) {
