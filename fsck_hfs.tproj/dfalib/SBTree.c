@@ -322,7 +322,9 @@ ErrorExit:
 OSStatus
 SetEndOfForkProc ( SFCB *filePtr, FSSize minEOF, FSSize maxEOF )
 {
+#if !LINUX
 #pragma unused (maxEOF)
+#endif
 
 	OSStatus	result;
 	UInt32		actualSectorsAdded;

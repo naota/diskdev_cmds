@@ -1705,7 +1705,9 @@ OSStatus	BTGetInformation	(SFCB					*filePtr,
 								 UInt16					 version,
 								 BTreeInfoRec			*info )
 {
+#if !LINUX
 #pragma unused (version)
+#endif
 
 	BTreeControlBlockPtr	btreePtr;
 

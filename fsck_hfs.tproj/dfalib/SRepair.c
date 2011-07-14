@@ -1617,7 +1617,9 @@ Output:
 
 static	OSErr	FixWrapperExtents( SGlobPtr GPtr, RepairOrderPtr p )
 {
+#if !LINUX
 #pragma unused (p)
+#endif
 
 	OSErr						err;
 	HFSMasterDirectoryBlock		*mdb;
