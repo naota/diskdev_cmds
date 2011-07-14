@@ -165,11 +165,14 @@ void SETOFFSET (void *buffer, UInt16 btNodeSize, SInt16 recOffset, SInt16 vecOff
 
 #define ROUNDUP(x, u)	(((x) % (u) == 0) ? (x) : ((x)/(u) + 1) * (u))
 
-#define ENCODING_TO_BIT(e)                               \
+#if LINUX
+#define ENCODING_TO_BIT(e)       (e)                    
+#else
+#define ENCODING_TO_BIT(e)
           ((e) < 48 ? (e) :                              \
           ((e) == kCFStringEncodingMacUkrainian ? 48 :   \
           ((e) == kCFStringEncodingMacFarsi ? 49 : 0)))
-
+#endif
 /*
  * make_hfs
  *	
