@@ -535,6 +535,7 @@ InitMDB(hfsparams_t *defaults, UInt32 driveBlocks, HFS_MDB *mdbp)
 	 * Map UTF-8 input into a Mac encoding.
 	 * On conversion errors "untitled" is used as a fallback.
 	 */
+#if !LINUX
 	{
 		UniChar unibuf[kHFSMaxVolumeNameChars];
 		CFStringRef cfstr;
@@ -560,7 +561,11 @@ InitMDB(hfsparams_t *defaults, UInt32 driveBlocks, HFS_MDB *mdbp)
 		bcopy(&mdbp->drVN[1], defaults->volumeName, mdbp->drVN[0]);
 		defaults->volumeName[mdbp->drVN[0]] = '\0';
 	}
+#endif
 	/* Save the encoding hint in the Finder Info (field 4). */
+	mdbp->drVN[0] = strlen(defaults->volumeName);
+	bcopy(defaults->volumeName,&mdbp->drVN[1],mdbp->drVN[0]);
+	
 	mdbp->drFndrInfo[4] = SET_HFS_TEXT_ENCODING(defaults->encodingHint);
 
 	mdbp->drWrCnt = kWriteSeqNum;
