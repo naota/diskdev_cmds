@@ -467,11 +467,15 @@ setup( char *dev, int *blockDevice_fdPtr, int *canWritePtr )
 
 static void getWriteAccess( char *dev, int *blockDevice_fdPtr, int *canWritePtr )
 {
+#if !LINUX
 	int					i;
 	int					myMountsCount;
+#endif
 	void *				myPtr;
 	char *				myCharPtr;
+#if !LINUX
 	struct statfs *		myBufPtr;
+#endif
 	void *				myNamePtr;
 
 	myPtr = NULL;
@@ -492,18 +496,19 @@ static void getWriteAccess( char *dev, int *blockDevice_fdPtr, int *canWritePtr 
 		*canWritePtr = 1;
 		goto ExitThisRoutine;
 	}
-	
 	// get count of mounts then get the info for each 
+#if LINUX
+	// FIXME
+#else
 	myMountsCount = getfsstat( NULL, 0, MNT_NOWAIT );
 	if ( myMountsCount < 0 )
 		goto ExitThisRoutine;
-
 	myPtr = (void *) malloc( sizeof(struct statfs) * myMountsCount );
 	if ( myPtr == NULL ) 
 		goto ExitThisRoutine;
 	myMountsCount = getfsstat( 	myPtr, 
-								(sizeof(struct statfs) * myMountsCount), 
-								MNT_NOWAIT );
+							(sizeof(struct statfs) * myMountsCount), 
+							MNT_NOWAIT );
 	if ( myMountsCount < 0 )
 		goto ExitThisRoutine;
 
@@ -517,8 +522,8 @@ static void getWriteAccess( char *dev, int *blockDevice_fdPtr, int *canWritePtr 
 		}
 		myBufPtr++;
 	}
+#endif
 	*canWritePtr = 1;  // single user will get us here, f_mntfromname is not /dev/diskXXXX 
-	
 ExitThisRoutine:
 	if ( myPtr != NULL )
 		free( myPtr );
