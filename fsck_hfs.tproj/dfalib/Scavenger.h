@@ -37,11 +37,16 @@
 #include "../fsck_debug.h"
 
 #include <assert.h>
+#if LINUX
+#define XATTR_MAXNAMELEN 127
+#include <limits.h>
+#else
 #include <sys/xattr.h>
 #include <sys/acl.h>
 #include <sys/kauth.h>
-#include <sys/errno.h>
 #include <sys/syslimits.h>
+#endif
+#include <sys/errno.h>
 
 #ifdef __cplusplus
 extern	"C" {
@@ -1463,6 +1468,10 @@ extern int 	AllocateContigBitmapBits (SVCB *vcb, UInt32 numBlocks, UInt32 *actua
 
 #ifdef __cplusplus
 };
+#endif
+
+#if LINUX
+#undef XATTR_MAXNAMELEN
 #endif
 
 #endif /* __SCAVENGER__ */
