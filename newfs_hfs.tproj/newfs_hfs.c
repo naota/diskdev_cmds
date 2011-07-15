@@ -556,8 +556,12 @@ hfs_newfs(char *device)
 		if (fstat( fso, &stbuf) < 0)
 			fatal("%s: %s", device, strerror(errno));
 
+#if LINUX
+		dip.physSectorSize = 512;
+#else
 		if (ioctl(fso, DKIOCGETBLOCKSIZE, &dip.physSectorSize) < 0)
 			fatal("%s: %s", device, strerror(errno));
+#endif
 
 		if ((dip.physSectorSize % kBytesPerSector) != 0)
 			fatal("%d is an unsupported sector size\n", dip.physSectorSize);
