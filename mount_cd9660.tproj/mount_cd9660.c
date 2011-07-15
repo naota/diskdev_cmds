@@ -75,7 +75,9 @@
 #include <fcntl.h>
 
 #include <CoreFoundation/CFBase.h>
+#if !LINUX
 #include <libkern/OSByteOrder.h>
+#endif
 #include <IOKit/IOKitLib.h>
 #include <IOKit/storage/IOCDMedia.h>
 #include <mntopts.h>

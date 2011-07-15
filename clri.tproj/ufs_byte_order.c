@@ -37,7 +37,9 @@
 #include <ufs/ufs/dir.h>
 #include <ufs/ffs/fs.h>
 #include "ufs_byte_order.h"
+#if !LINUX
 #include <libkern/OSByteOrder.h>
+#endif
 
 
 

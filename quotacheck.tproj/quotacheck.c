@@ -81,7 +81,9 @@
 #include <err.h>
 
 #ifdef __APPLE__
+#if !LINUX
 #include <libkern/OSByteOrder.h>
+#endif
 #endif /* __APPLE__ */
 
 #include "quotacheck.h"

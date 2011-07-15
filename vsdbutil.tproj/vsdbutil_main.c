@@ -61,7 +61,9 @@
  */
 #define COMMON_DIGEST_FOR_OPENSSL
 #include <CommonCrypto/CommonDigest.h>
+#if !LINUX
 #include <libkern/OSByteOrder.h>
+#endif
 
 struct FinderAttrBuf {
 	u_int32_t info_length;

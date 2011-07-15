@@ -88,7 +88,9 @@ __unused static char sccsid[] = "@(#)repquota.c	8.2 (Berkeley) 11/22/94";
 #include <string.h>
 #include <unistd.h>
 #ifdef __APPLE__
+#if !LINUX
 #include <libkern/OSByteOrder.h>
+#endif
 #endif /* __APPLE__ */
 
 char *qfname = QUOTAFILENAME;

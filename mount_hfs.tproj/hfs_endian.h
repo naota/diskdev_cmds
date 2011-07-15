@@ -29,7 +29,9 @@
  * This file prototypes endian swapping routines for the HFS/HFS Plus
  * volume format.
  */
+#if !LINUX
 #include <libkern/OSByteOrder.h>
+#endif
 
 /*********************/
 /* BIG ENDIAN Macros */

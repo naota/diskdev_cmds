@@ -70,7 +70,9 @@
 
 #ifdef __APPLE__
 #include <sys/quota.h>
+#if !LINUX
 #include <libkern/OSByteOrder.h>
+#endif
 #else
 #include <ufs/ufs/quota.h>
 #endif /* __APPLE__ */

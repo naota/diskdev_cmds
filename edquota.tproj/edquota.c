@@ -93,7 +93,9 @@ __unused static char sccsid[] = "@(#)edquota.c	8.3 (Berkeley) 4/27/95";
 #include "pathnames.h"
 
 #ifdef __APPLE__
+#if !LINUX
 #include <libkern/OSByteOrder.h>
+#endif
 #endif /* __APPLE__ */
 
 char *qfname = QUOTAFILENAME;
