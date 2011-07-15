@@ -649,12 +649,14 @@ RepairHardLinkChains(SGlobPtr gp, Boolean isdir)
 			 * knowledge of hard links on the disk during repair.
 			 */
 			if (isdir) {
+#if !LINUX
 				/* Check if the directory hard link has UF_IMMUTABLE bit set */
 				if ((file->bsdInfo.ownerFlags & UF_IMMUTABLE) == 0) {
 					record_dirlink_badownerflags(gp, file->fileID, 
 						file->bsdInfo.ownerFlags, 
 						file->bsdInfo.ownerFlags | UF_IMMUTABLE, true);
 				}
+#endif
 
 				/* Check Finder Info */
 				if ((file->userInfo.fdType != kHFSAliasType) ||
