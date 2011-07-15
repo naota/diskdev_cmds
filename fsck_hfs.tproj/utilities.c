@@ -56,7 +56,11 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/errno.h>
+#if LINUX
+#include <limits.h>
+#else
 #include <sys/syslimits.h>
+#endif
 #include <pwd.h>
 
 #include <ctype.h>
