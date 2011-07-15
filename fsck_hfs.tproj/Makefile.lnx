@@ -1,7 +1,8 @@
-CFILES = fsck_hfs.c strings.c utilities.c cache.c
+CFILES = fsck_hfs.c strings.c utilities.c cache.c fsck_messages.c fsck_debug.c\
+       fsck_hfs_strings.c fsck_strings.c _version.c
 OFILES = $(CFILES:.c=.o)
 
-LDFLAGS+=-lmount
+LDFLAGS+=-lmount -lpthread
 
 all: fsck_hfs
 
@@ -9,6 +10,9 @@ fsck_hfs: $(OFILES) dfalib/libdfa.a
 
 dfalib/libdfa.a: FORCE
 	$(MAKE) -C dfalib -f Makefile.lnx libdfa.a
+
+_version.c:
+	LANG=C ./version.pl diskdev_cmds > $@
 
 clean:
 	$(RM) fsck_hfs $(OFILES)
