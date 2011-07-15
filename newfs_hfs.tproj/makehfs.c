@@ -1233,6 +1233,11 @@ WriteAttributesFile(const DriveInfo *driveInfo, UInt64 startingSector,
 static int
 get_dev_uuid(const char *disk_name, char *dev_uuid_str, int dev_uuid_len)
 {
+#if LINUX
+	/* FIXME */
+	printf("get_dev_uuid() not implemented on Linux\n");
+	return EINVAL;
+#else
     DADiskRef dref;
     CFDictionaryRef description;
     CFUUIDRef dev_uuid;
@@ -1270,6 +1275,7 @@ get_dev_uuid(const char *disk_name, char *dev_uuid_str, int dev_uuid_len)
     CFRelease(session);
     
     return ret;
+#endif
 }
 
 static int
