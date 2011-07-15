@@ -28,6 +28,8 @@
 #ifndef __HFS_FORMAT__
 #define __HFS_FORMAT__
 
+#include "missing.h"
+
 #include <sys/types.h>
 #include <sys/appleapiopts.h>
 
