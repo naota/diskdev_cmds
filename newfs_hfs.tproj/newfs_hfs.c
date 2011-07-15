@@ -56,6 +56,10 @@
 #include <varargs.h>
 #endif
 
+#if LINUX
+#include <libmount/libmount.h>
+#endif
+
 #define	NOVAL       (-1)
 #define UMASK       (0755)
 #define	ACCESSMASK  (0777)
@@ -303,6 +307,28 @@ main(argc, argv)
 		/*
 		 * Check if target device is aready mounted
 		 */
+#if LINUX
+		struct libmnt_table *tb = mnt_new_table();
+		int res;
+		struct libmnt_fs *fs;
+
+		res = mnt_table_parse_mtab(tb, "/etc/mtab");
+		if (res) {
+			mnt_free_table(tb);
+			fatal("%s: mnt_table_parse_mtab\n");
+		}
+		fs = mnt_table_find_srcpath(tb, blkdevice, MNT_ITER_FORWARD);
+		if (fs != NULL) {
+			const char *target = mnt_fs_get_target(fs);
+			char* path = (char*)malloc(strlen(target)+1);
+			strcpy(path, target);
+			mnt_free_fs(fs);
+			mnt_free_table(tb);
+			fatal("%s is mounted on %s", blkdevice, path);
+		}
+		mnt_free_fs(fs);
+		mnt_free_table(tb);
+#else
 		n = getmntinfo(&mp, MNT_NOWAIT);
 		if (n == 0)
 			fatal("%s: getmntinfo: %s", blkdevice, strerror(errno));
@@ -312,6 +338,7 @@ main(argc, argv)
 				fatal("%s is mounted on %s", blkdevice, mp->f_mntonname);
 			++mp;
 		}
+#endif
 	}
 
 	if (hfs_newfs(blkdevice) < 0) {
