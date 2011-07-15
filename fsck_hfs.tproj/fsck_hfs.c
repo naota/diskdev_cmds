@@ -171,10 +171,12 @@ main(argc, argv)
 			}
 			break;
 
+#if !LINUX
 		case 'E':
 			/* Exit on first error, after logging it */
 			errorOnExit = 1;
 			break;
+#endif
 		case 'f':
 			force++;
 			break;

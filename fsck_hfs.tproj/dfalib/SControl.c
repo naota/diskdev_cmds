@@ -216,7 +216,11 @@ CheckHFS( const char *rdevnode, int fsReadRef, int fsWriteRef, int checkLevel,
 	int					isJournaled = 0;
 	Boolean 			autoRepair;
 	Boolean				exitEarly = 0;
+#if LINUX
+	int *msgCounts = NULL;
+#else
 	__block int *msgCounts = NULL;
+#endif
 	Boolean				majorErrors = 0;
 
 	if (checkLevel == kMajorCheck) {
@@ -278,6 +282,7 @@ CheckHFS( const char *rdevnode, int fsReadRef, int fsWriteRef, int checkLevel,
 		majorErrors = 1;
 		goto EarlyExitLabel;
 	} else {
+#if !LINUX
 		if (exitEarly && fsckContext) {
 			/*
 			 * Set the after-printing block to a small bit of code that checks to see if
@@ -295,6 +300,7 @@ CheckHFS( const char *rdevnode, int fsReadRef, int fsWriteRef, int checkLevel,
 				}
 			});
 		}
+#endif
 	}
 DoAgain:
 	ClearMemory( &dataArea, sizeof(SGlob) );
