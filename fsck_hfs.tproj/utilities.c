@@ -837,7 +837,11 @@ start_progress(void)
 	int enable = 1;
 	if (hotroot == 0)
 		return;
+#if LINUX
+	rv = -1;
+#else
 	rv = sysctlbyname(kProgressToggle, NULL, NULL, &enable, sizeof(enable));
+#endif
 	if (debug && rv == -1) {
 		warn("sysctl(%s) failed", kProgressToggle);
 	}
@@ -849,7 +853,11 @@ draw_progress(int pct)
 	int rv;
 	if (hotroot == 0)
 		return;
+#if LINUX
+	rv = -1;
+#else
 	rv = sysctlbyname(kProgress, NULL, NULL, &pct, sizeof(pct));
+#endif
 	if (debug && rv == -1) {
 		warn("sysctl(%s) failed", kProgress);
 	}
@@ -862,7 +870,11 @@ end_progress(void)
 	int enable = 0;
 	if (hotroot == 0)
 		return;
+#if LINUX
+	rv = -1;
+#else
 	rv = sysctlbyname(kProgressToggle, NULL, NULL, &enable, sizeof(enable));
+#endif
 	if (debug && rv == -1) {
 		warn("sysctl(%s) failed", kProgressToggle);
 	}
