@@ -71,6 +71,10 @@
 #include <stdlib.h>
 #include <sys/sysctl.h>
 
+#if LINUX
+#include <signal.h>
+#endif
+
 #include "fsck_hfs.h"
 
 #if LINUX
