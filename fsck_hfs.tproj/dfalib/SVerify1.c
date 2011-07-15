@@ -4213,6 +4213,9 @@ static int CompareExtentFileID(const void *first, const void *second)
  */
 int journal_replay(SGlobPtr gptr)
 {
+#if LINUX
+	return 0;
+#else
 	int retval = 0;
 	struct vfsconf vfc;
 	int mib[4];
@@ -4239,5 +4242,6 @@ int journal_replay(SGlobPtr gptr)
 
 out:
 	return retval;
+#endif
 }
  
