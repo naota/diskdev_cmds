@@ -672,9 +672,12 @@ setup( char *dev, int *canWritePtr )
 		 * then we will use half of physical memory; otherwise, we'll use an eigth.
 		 *
 		 */
+#if !LINUX
 		uint64_t memSize;
 		size_t dsize = sizeof(memSize);
+
 		int rv;
+
 
 		rv = sysctlbyname("hw.memsize", &memSize, &dsize, NULL, 0);
 		if (rv == -1) {
@@ -683,6 +686,7 @@ setup( char *dev, int *canWritePtr )
 			int d = (hotroot && !lflag) ? 2 : 8;
 			reqCacheSize = memSize / d;
 		}
+#endif
 	}
 	
 	CalculateCacheSizes(reqCacheSize, &cacheBlockSize, &cacheTotalBlocks, debug);
