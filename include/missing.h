@@ -65,6 +65,7 @@
 #define Boolean			u_int8_t
 
 #define UF_NODUMP	0x00000001
+#define	UF_IMMUTABLE	0x00000002	/* file may not be changed */
 
 /* syslimits.h */
 #define NAME_MAX	255
