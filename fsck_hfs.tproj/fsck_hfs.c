@@ -613,7 +613,12 @@ setup( char *dev, int *canWritePtr )
 	
 	if (preen == 0 && !guiControl)
 		plog("** %s", dev);
+#if LINUX
+	if (nflag || quick || (fswritefd = open(dev, O_RDWR)) < 0) {
+		fcntl(fswritefd, LOCK_EX);
+#else
 	if (nflag || quick || (fswritefd = open(dev, O_RDWR | (hotroot ? 0 : O_EXLOCK))) < 0) {
+#endif
 		fswritefd = -1;
 		if (preen)
 			pfatal("NO WRITE ACCESS");
@@ -724,7 +729,12 @@ static void getWriteAccess( char *dev, int *canWritePtr )
 	if ( (myCharPtr = strrchr( (char *)myNamePtr, '/' )) != 0 ) {
 		if ( myCharPtr[1] == 'r' ) {
 			strcpy( &myCharPtr[1], &myCharPtr[2] );
+#if LINUX
+			blockDevice_fd = open( (char *)myNamePtr, O_WRONLY);
+			fcntl(blockDevice_fd, LOCK_EX);
+#else
 			blockDevice_fd = open( (char *)myNamePtr, O_WRONLY | (hotroot ? 0 : O_EXLOCK) );
+#endif
 		}
 	}
 	
