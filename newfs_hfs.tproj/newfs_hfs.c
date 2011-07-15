@@ -433,8 +433,8 @@ static void getclumpopts(char* optlist)
 	}
 }
 
-gid_t
-static a_gid(char *s)
+static gid_t
+a_gid(char *s)
 {
 	struct group *gr;
 	char *gname;
