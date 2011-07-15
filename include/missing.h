@@ -119,4 +119,6 @@
 
 #define strlcpy(dest, src, n) strncpy(dest, src, n)
 
+typedef char    uuid_string_t[37];
+
 #endif
