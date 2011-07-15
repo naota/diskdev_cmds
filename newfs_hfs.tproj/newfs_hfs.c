@@ -276,7 +276,11 @@ main(argc, argv)
 		if (argc != 0)
 			usage();
 
+#if LINUX
+		blkdevice[0] = 0;
+#else
 		rawdevice[0] = blkdevice[0] = 0;
+#endif
 	} else {
 		if (argc != 1)
 			usage();
@@ -311,7 +315,7 @@ main(argc, argv)
 	}
 
 	if (hfs_newfs(blkdevice) < 0) {
-		err(1, "cannot create filesystem on %s", rawdevice);
+		err(1, "cannot create filesystem on %s", blkdevice);
 	}
 
 	exit(0);
