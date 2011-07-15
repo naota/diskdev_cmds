@@ -56,7 +56,7 @@ unsigned long cur_debug_level;
  * Output:
  *	Nothing
  */
-void dprintf (unsigned long type, char *fmt, ...) 
+void debug_printf (unsigned long type, char *fmt, ...) 
 {
 	if (cur_debug_level & type) {
 		va_list ap;
