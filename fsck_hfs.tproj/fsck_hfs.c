@@ -386,7 +386,6 @@ checkfilesys(char * filesys)
 		    }
 		}
 	}
-#endif
 	if (debug && preen)
 		pwarn("starting\n");
 	
@@ -509,7 +508,6 @@ checkfilesys(char * filesys)
 				goto ExitThisRoutine;
 			}
 		}
-#endif
 		if (!preen)
 			plog("\n***** REBOOT NOW *****\n");
 		sync();
@@ -717,7 +715,7 @@ static void getWriteAccess( char *dev, int *canWritePtr )
 		}
 		myBufPtr++;
 	}
-#endif
+
 	*canWritePtr = 1;  // single user will get us here, f_mntfromname is not /dev/diskXXXX 
 ExitThisRoutine:
 	if ( myPtr != NULL )
