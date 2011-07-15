@@ -28,7 +28,9 @@
 #include <stdarg.h>
 #include <string.h>
 #include <assert.h>
+#if !LINUX
 #include <Block.h>
+#endif
 
 #include "fsck_messages.h"
 #include "fsck_keys.h"
@@ -63,8 +65,10 @@ struct context {
 	void (*writer)(fsck_ctx_t, const char*);	// Print out the string
 	char guiControl;
 	char xmlControl;
+#if !LINUX
 	fsckBlock_t preMessage;
 	fsckBlock_t postMessage;
+#endif
 };
 
 /*
@@ -273,6 +277,7 @@ fsckCreate(void)
 	return (fsck_ctx_t)rv;
 }
 
+#if !LINUX
 /*
  * fsckSetBlock()
  * Sets the block to be called for the specific phase -- currently, only
@@ -334,6 +339,7 @@ fsckGetBlock(fsck_ctx_t c, fsck_block_phase_t phase)
 	}
 	return retval;
 }
+#endif
 
 /*
  * fsckSetWriter(context, void (*)(fsck_ctx_t, const char *)
@@ -585,12 +591,14 @@ fsckDestroy(fsck_ctx_t c)
 	if (ctx->flags & cfFromFD) {
 		fclose(ctx->fp);
 	}
+#if !LINUX
 	if (ctx->preMessage) {
 		Block_release(ctx->preMessage);
 	}
 	if (ctx->postMessage) {
 		Block_release(ctx->postMessage);
 	}
+#endif
 
 	free(ctx);
 	return;
@@ -949,6 +957,7 @@ fsckPrint(fsck_ctx_t c, int m, ...)
 			break;
 	}
 
+#if !LINUX
 	if (ctx->preMessage) {
 		va_list vaBlock;
 		fsck_block_status_t rv;
@@ -964,11 +973,13 @@ fsckPrint(fsck_ctx_t c, int m, ...)
 			goto done;
 		}
 	}
+#endif
 	if (ctx->writer) {
 		retval = (*func)(ctx, msg, ap);
 	} else {
 		retval = 0;    // NULL fp means don't output anything
 	}
+#if !LINUX
 	if (ctx->postMessage) {
 		va_list vaBlock;
 		fsck_block_status_t rv;
@@ -984,6 +995,7 @@ fsckPrint(fsck_ctx_t c, int m, ...)
 			goto done;
 		}
 	}
+#endif
 	
 #if 0
 	/* Log each fsck string to the log file */
