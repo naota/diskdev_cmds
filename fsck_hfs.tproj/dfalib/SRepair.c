@@ -2691,13 +2691,18 @@ static OSErr FixAttrSize(SGlobPtr GPtr, RepairOrderPtr p)
 	result = BTSearchRecord(GPtr->calculatedAttributesFCB, &iterator, 
 				kInvalidMRUCacheKey, &btRecord, &recSize, &iterator);
 	if (result) {
-		dprintf (d_error|d_xattr, "%s: Cannot find attribute record (err = %d)\n", __FUNCTION__, result);
+		debug_printf(d_error | d_xattr,
+			     "%s: Cannot find attribute record (err = %d)\n",
+			     __FUNCTION__,
+			     result);
 		goto out;
 	}
 
 	/* We should only get record of type kHFSPlusAttrForkData */
 	if (record.recordType != kHFSPlusAttrForkData) {
-		dprintf (d_error|d_xattr, "%s: Record found is not attribute fork data\n", __FUNCTION__);
+		debug_printf(d_error | d_xattr,
+			     "%s: Record found is not attribute fork data\n",
+			     __FUNCTION__);
 		result = btNotFound;
 		goto out;
 	}
@@ -2728,7 +2733,10 @@ static OSErr FixAttrSize(SGlobPtr GPtr, RepairOrderPtr p)
 		result = BTReplaceRecord(GPtr->calculatedAttributesFCB, &iterator,
 					&btRecord, recSize);
 		if (result) {
-			dprintf (d_error|d_xattr, "%s: Cannot replace attribute record (err=%d)\n", __FUNCTION__, result);
+			debug_printf(d_error | d_xattr,
+				     "%s: Cannot replace attribute record (err=%d)\n",
+				     __FUNCTION__,
+				     result);
 			goto out;
 		}
 	}
@@ -2924,7 +2932,12 @@ del_overflow_extents:
 
 		/* Delete the extent record */ 
 		err = DeleteBTreeRecord(GPtr->calculatedExtentsFCB, &extentKey);
-		dprintf (d_info, "%s: Deleting extent overflow for fileID=%u, forkType=%u, startBlock=%u\n", __FUNCTION__, fileID, forkType, foundStartBlock);
+		debug_printf(d_info,
+			     "%s: Deleting extent overflow for fileID=%u, forkType=%u, startBlock=%u\n",
+			     __FUNCTION__,
+			     fileID,
+			     forkType,
+			     foundStartBlock);
 		if (err) {
 			goto create_symlink;
 		}
@@ -4190,12 +4203,19 @@ static OSErr MoveExtent(SGlobPtr GPtr, ExtentInfo *extentInfo)
 											  &extentData, &recordSize, &foundExtentIndex);
 				foundLocation = extentsBTree;
 				if (err != noErr) {
-					dprintf (d_error|d_overlap, "%s: No matching extent record found in extents btree for fileID = %d (err=%d)\n", __FUNCTION__, extentInfo->fileID, err);
+					debug_printf(d_error | d_overlap,
+						     "%s: No matching extent record found in extents btree for fileID = %d (err=%d)\n",
+						     __FUNCTION__,
+						     extentInfo->fileID,
+						     err);
 					goto out;
 				}
 			} else {
 				/* No more extents exist for this file */
-				dprintf (d_error|d_overlap, "%s: No matching extent record found for fileID = %d\n", __FUNCTION__, extentInfo->fileID);
+				debug_printf(d_error | d_overlap,
+					     "%s: No matching extent record found for fileID = %d\n",
+					     __FUNCTION__,
+					     extentInfo->fileID);
 				goto out;
 			}
 		}
@@ -4204,7 +4224,11 @@ static OSErr MoveExtent(SGlobPtr GPtr, ExtentInfo *extentInfo)
 	err = CopyDiskBlocks(GPtr, extentInfo->startBlock, extentInfo->blockCount, 
 						 extentInfo->newStartBlock);
 	if (err != noErr) {
-		dprintf (d_error|d_overlap, "%s: Error in copying disk blocks for fileID = %d (err=%d)\n", __FUNCTION__, extentInfo->fileID, err);
+		debug_printf(d_error | d_overlap,
+			     "%s: Error in copying disk blocks for fileID = %d (err=%d)\n",
+			     __FUNCTION__,
+			     extentInfo->fileID,
+			     err);
 		goto out;
 	}
 	
@@ -4223,7 +4247,11 @@ static OSErr MoveExtent(SGlobPtr GPtr, ExtentInfo *extentInfo)
 
 	}
 	if (err != noErr) {
-	        dprintf (d_error|d_overlap, "%s: Error in updating extent record for fileID = %d (err=%d)\n", __FUNCTION__, extentInfo->fileID, err);
+	        debug_printf(d_error | d_overlap,
+			     "%s: Error in updating extent record for fileID = %d (err=%d)\n",
+			     __FUNCTION__,
+			     extentInfo->fileID,
+			     err);
 		goto out;
 	}
 
@@ -4454,7 +4482,12 @@ static OSErr SearchExtentInAttributeBT(SGlobPtr GPtr, ExtentInfo *extentInfo,
 	result = BTSearchRecord(GPtr->calculatedAttributesFCB, &iterator, 
 				kInvalidMRUCacheKey, &btRecord, recordSize, &iterator);
 	if (result) {
-		dprintf (d_error|d_overlap, "%s: Error finding attribute record (err=%d) for fileID = %d, attrname = %d\n", __FUNCTION__, result, extentInfo->fileID, extentInfo->attrname);
+		debug_printf(d_error | d_overlap,
+			     "%s: Error finding attribute record (err=%d) for fileID = %d, attrname = %d\n",
+			     __FUNCTION__,
+			     result,
+			     extentInfo->fileID,
+			     extentInfo->attrname);
 		goto out;	
 	}
 	

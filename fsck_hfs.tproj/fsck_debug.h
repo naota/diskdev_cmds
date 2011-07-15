@@ -35,18 +35,18 @@ enum debug_message_type {
 	d_overlap	=	0x0020 	/* Overlap extents related messages */
 };
 
-/* Current debug level of fsck_hfs for printing messages via dprintf */
+/* Current debug level of fsck_hfs for printing messages via debug_printf */
 extern unsigned long cur_debug_level;
 
-/* Function: dprintf
+/* Function: debug_printf
  *
  * Description: Debug function similar to printf except the first parameter
- * which indicates the type of message to be printed by dprintf. Based on 
+ * which indicates the type of message to be printed by debug_printf. Based on 
  * current debug level and the type of message, the function decides 
  * whether to print the message or not.
  *
  * Each unique message type has a bit assigned to it.  The message type 
- * passed to dprintf can be one or combination (OR-ed value) of pre-defined 
+ * passed to debug_printf can be one or combination (OR-ed value) of pre-defined 
  * debug message types.  Only the messages whose type have one or more similar
  * bits set in comparison with current global debug level are printed. 
  *
@@ -66,6 +66,6 @@ extern unsigned long cur_debug_level;
  * Output:
  *	Nothing
  */
-extern void dprintf (unsigned long message_type, char *format, ...);
+extern void debug_printf (unsigned long message_type, char *format, ...);
 
 #endif /* __FSCK_DEBUG__ */

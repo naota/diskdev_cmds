@@ -51,27 +51,27 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#if !LINUX
 #include <wipefs.h>
+#endif
 
 /*
  * CommonCrypto is meant to be a more stable API than OpenSSL.
  * Defining COMMON_DIGEST_FOR_OPENSSL gives API-compatibility
  * with OpenSSL, so we don't have to change the code.
  */
+#if !LINUX
 #define COMMON_DIGEST_FOR_OPENSSL
 #include <CommonCrypto/CommonDigest.h>
 
 #include <libkern/OSByteOrder.h>
 
-#if !LINUX
 #include <CoreFoundation/CFString.h>
 #include <CoreFoundation/CFStringEncodingExt.h>
-#endif
 #include <DiskArbitration/DiskArbitration.h>
 
 #include <TargetConditionals.h>
 
-#if !LINUX
 extern Boolean _CFStringGetFileSystemRepresentation(CFStringRef string, UInt8 *buffer, CFIndex maxBufLen);
 #endif
 

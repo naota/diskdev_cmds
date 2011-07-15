@@ -2269,9 +2269,19 @@ CheckAttributeRecord(SGlobPtr GPtr, const HFSPlusAttrKey *key, const HFSPlusAttr
 	
 	if (doDelete == true) {
 		result = DeleteBTreeRecord(GPtr->calculatedAttributesFCB, key);
-		dprintf (d_info|d_xattr, "%s: Deleting attribute %s for fileID %d, type = %d\n", __FUNCTION__, attrname, key->fileID, rec->recordType);
+		debug_printf(d_info | d_xattr,
+			     "%s: Deleting attribute %s for fileID %d, type = %d\n",
+			     __FUNCTION__,
+			     attrname,
+			     key->fileID,
+			     rec->recordType);
 		if (result) {
-			dprintf (d_error|d_xattr, "%s: Error in deleting record for %s for fileID %d, type = %d\n", __FUNCTION__, attrname, key->fileID, rec->recordType);
+			debug_printf(d_error | d_xattr,
+				     "%s: Error in deleting record for %s for fileID %d, type = %d\n",
+				     __FUNCTION__,
+				     attrname,
+				     key->fileID,
+				     rec->recordType);
 		}
 		
 		/* Set flags to mark header and map dirty */
@@ -3521,7 +3531,12 @@ OSErr	CheckFileExtents( SGlobPtr GPtr, UInt32 fileNumber, UInt8 forkType,
 		//	checkout the extent record first
 		err = ChkExtRec( GPtr, extents, &lastExtentIndex );
 		if (err != noErr) {
-			dprintf (d_info, "%s: Bad extent for fileID %u in extent %u for startblock %u\n", __FUNCTION__, fileNumber, lastExtentIndex, blockCount);
+			debug_printf(d_info,
+				     "%s: Bad extent for fileID %u in extent %u for startblock %u\n",
+				     __FUNCTION__,
+				     fileNumber,
+				     lastExtentIndex,
+				     blockCount);
 
 			/* Stop verification if bad extent is found for system file or EA */
 			if ((fileNumber < kHFSFirstUserCatalogNodeID) ||
