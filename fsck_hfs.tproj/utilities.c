@@ -73,6 +73,11 @@
 
 #include "fsck_hfs.h"
 
+#if LINUX
+#define strlcpy(a, b, c) strncpy(a, b, c)
+#define strlcat(a, b, c) strncat(a, b, c)
+#endif
+
 char *rawname __P((char *name));
 char *unrawname __P((char *name));
 
