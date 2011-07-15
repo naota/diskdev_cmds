@@ -599,6 +599,7 @@ hfs_newfs(char *device)
 
 	dip.physSectorsPerIO = (1024 * 1024) / dip.physSectorSize;  /* use 1M as default */
 
+#if !LINUX
 	if (fso != -1 && ioctl(fso, DKIOCGETMAXBLOCKCOUNTREAD, &maxPhysPerIO) < 0)
 		fatal("%s: %s", device, strerror(errno));
 
@@ -622,6 +623,7 @@ hfs_newfs(char *device)
 
 	if (maxPhysPerIO)
 		dip.physSectorsPerIO = MIN(dip.physSectorsPerIO, maxPhysPerIO / dip.physSectorSize);
+#endif
 
 	dip.sectorSize = kBytesPerSector;
 	dip.totalSectors = dip.physTotalSectors * dip.physSectorSize / dip.sectorSize;
