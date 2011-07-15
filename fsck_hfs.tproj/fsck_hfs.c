@@ -46,6 +46,7 @@
 
 #if LINUX
 #include <libmount/libmount.h>
+#include <sys/statvfs.h>
 #endif
 
 #include "fsck_hfs.h"
@@ -508,6 +509,14 @@ checkfilesys(char * filesys)
 			}
 		}
 	} else {
+#if LINUX
+		struct statvfs stfs_buf;
+		if (statvfs("/", &stfs_buf) == 0)
+			flags = stfs_buf.f_flag;
+		else
+			flags = 0;
+		ckfini(flags & ST_RDONLY);
+#else
 		struct statfs64 stfs_buf;
 		/*
 		 * Check to see if root is mounted read-write.
@@ -517,6 +526,7 @@ checkfilesys(char * filesys)
 		else
 			flags = 0;
 		ckfini(flags & MNT_RDONLY);
+#endif
 	}
 
 	/* XXX free any allocated memory here */
