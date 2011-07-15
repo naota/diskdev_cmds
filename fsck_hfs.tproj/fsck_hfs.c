@@ -541,6 +541,7 @@ checkfilesys(char * filesys)
 		 */
 		if (!preen)
 			plog("\n***** FILE SYSTEM WAS MODIFIED *****\n");
+#if !LINUX
 		if (flags & MNT_RDONLY) {		
 			bzero(&args, sizeof(args));
 			flags |= MNT_UPDATE | MNT_RELOAD;
@@ -549,6 +550,7 @@ checkfilesys(char * filesys)
 				goto ExitThisRoutine;
 			}
 		}
+#endif
 		if (!preen)
 			plog("\n***** REBOOT NOW *****\n");
 		sync();
