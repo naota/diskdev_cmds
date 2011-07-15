@@ -568,7 +568,6 @@ hfs_newfs(char *device)
 
 #if LINUX
 		dip.sectorSize = 512;
-		dip.sectorsPerIO = 256;
  
 #ifndef	BLKGETSIZE
 #define	BLKGETSIZE		_IO(0x12,96)
