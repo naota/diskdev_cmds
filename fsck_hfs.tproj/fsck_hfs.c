@@ -44,6 +44,10 @@
 #include <stdlib.h>
 #include <ctype.h>
 
+#if LINUX
+#include <libmount/libmount.h>
+#endif
+
 #include "fsck_hfs.h"
 #include "fsck_hfs_msgnums.h"
 
@@ -331,7 +335,20 @@ checkfilesys(char * filesys)
 
 	if (lflag) {
 		struct stat fs_stat;
+#if LINUX
+		struct libmnt_table *tb = mnt_new_table();
+		int res;
+		struct libmnt_fs *fs;
+
+		res = mnt_table_parse_mtab(tb, "/etc/mtab");
+		if (res) {
+			mnt_free_table(tb);
+			plog("ERROR: mnt_table_parse_mtab\n");
+			return EEXIT;
+		}
+#else
 		result = getmntinfo64(&fsinfo, MNT_NOWAIT);
+#endif
 
 		if (stat(cdevname, &fs_stat) != -1 &&
 			(((fs_stat.st_mode & S_IFMT) == S_IFCHR) ||
@@ -355,6 +372,19 @@ checkfilesys(char * filesys)
 			}
 
 		}
+#if LINUX
+		unraw = strdup(cdevname);
+		unrawname(unraw);
+		fs = mnt_table_find_srcpath(tb, unraw, MNT_ITER_FORWARD);
+		if (fs != NULL) {
+			const char *target = mnt_fs_get_target(fs);
+			mntonname = strdup(target);
+			mnt_free_fs(fs);
+			mnt_free_table(tb);
+		}
+		mnt_free_fs(fs);
+		mnt_free_table(tb);
+#else
 		while (result--) {
 			unraw = strdup(cdevname);
 			unrawname(unraw);
@@ -368,6 +398,7 @@ checkfilesys(char * filesys)
 				unraw = NULL;
 			}
 		}
+#endif
 
 		if (mntonname != NULL) {
 		    fs_fd = open(mntonname, O_RDONLY);
@@ -691,6 +722,31 @@ static void getWriteAccess( char *dev, int *canWritePtr )
 		goto ExitThisRoutine;
 	}
 	
+#if LINUX
+	struct libmnt_table *tb = mnt_new_table();
+	int res;
+	struct libmnt_fs *fs;
+	struct libmnt_iter *iter = mnt_new_iter(MNT_ITER_FORWARD);
+
+	res = mnt_table_parse_mtab(tb, "/etc/mtab");
+	if (res) {
+		mnt_free_table(tb);
+		goto ExitThisRoutine;
+	}
+	while(mnt_table_next_fs(tb, iter, &fs) == 0){
+		struct statvfs stfs_buf;
+		if(statvfs("/", &stfs_buf) == 0 && stfs_buf.f_flag & ST_RDONLY){
+			mnt_free_fs(fs);
+			mnt_free_iter(iter);
+			mnt_free_table(tb);
+			*canWritePtr = 1;
+			goto ExitThisRoutine;
+		}
+	}
+	mnt_free_fs(fs);
+	mnt_free_iter(iter);
+	mnt_free_table(tb);
+#else	
 	// get count of mounts then get the info for each 
 	myMountsCount = getfsstat64( NULL, 0, MNT_NOWAIT );
 	if ( myMountsCount < 0 )
@@ -715,6 +771,7 @@ static void getWriteAccess( char *dev, int *canWritePtr )
 		}
 		myBufPtr++;
 	}
+#endif
 
 	*canWritePtr = 1;  // single user will get us here, f_mntfromname is not /dev/diskXXXX 
 ExitThisRoutine:

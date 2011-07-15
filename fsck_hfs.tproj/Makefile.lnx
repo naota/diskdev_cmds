@@ -1,6 +1,8 @@
 CFILES = fsck_hfs.c strings.c utilities.c cache.c
 OFILES = $(CFILES:.c=.o)
 
+LDFLAGS+=-lmount
+
 all: fsck_hfs
 
 fsck_hfs: $(OFILES) dfalib/libdfa.a
