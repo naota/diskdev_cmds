@@ -546,7 +546,9 @@ hfs_newfs(char *device)
 		}
 
 		dip.fd = fso;
+#if !LINUX
 		fcntl(fso, F_NOCACHE, 1);
+#endif
 
 		if (fso < 0)
 			fatal("%s: %s", device, strerror(errno));
