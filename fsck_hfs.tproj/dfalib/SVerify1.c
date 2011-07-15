@@ -3305,7 +3305,11 @@ static int RecordBadExtent(SGlobPtr GPtr, UInt32 fileID, UInt8 forkType,
 /*
  * Build a catalog node thread key.
  */
+#if LINUX
+static void
+#else
 __unused static void
+#endif
 buildthreadkey(UInt32 parentID, int std_hfs, CatalogKey *key)
 {
 	if (std_hfs) {
