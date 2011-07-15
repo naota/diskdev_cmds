@@ -51,7 +51,12 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+
 #if !LINUX
+# define HAVE_LIBUTIL
+#endif
+
+#ifdef HAVE_LIBUTIL
 #include <wipefs.h>
 #endif
 
@@ -204,6 +209,7 @@ void SETOFFSET (void *buffer, UInt16 btNodeSize, SInt16 recOffset, SInt16 vecOff
  * which was used to erase the beginning and end of the filesystem.
  *
  */
+#ifdef HAVE_LIBUTIL
 static int
 dowipefs(int fd)
 {
@@ -217,6 +223,7 @@ dowipefs(int fd)
 	wipefs_free(&handle);
 	return err;
 }
+#endif
 
 /*
  * make_hfs
@@ -271,7 +278,14 @@ make_hfs(const DriveInfo *driveInfo,
 		diskBlocksUsed += MAX(sizeof(hfswrap_readme), mdbp->drAlBlkSiz) / kBytesPerSector;
 		diskBlocksUsed += MAX(24 * 1024, mdbp->drAlBlkSiz) / kBytesPerSector;
 	}
+#ifdef HAVE_LIBUTIL
 	(void)dowipefs(driveInfo->fd);
+#else
+	/* FIXME: Old code revived. Consider using libutil */
+	WriteBuffer(driveInfo, 0, diskBlocksUsed * kBytesPerSector, NULL);
+	/* also clear out last 8 sectors (4K) */
+	WriteBuffer(driveInfo, driveInfo->totalSectors - 8, 4 * 1024, NULL);
+#endif
 
 	/* If this is a wrapper, add boot files... */
 	if (defaults->flags & kMakeHFSWrapper) {
@@ -371,6 +385,9 @@ make_hfsplus(const DriveInfo *driveInfo, hfsparams_t *defaults)
 	UInt32			sectorsPerBlock;
 	UInt32			mapNodes;
 	UInt32			sectorsPerNode;
+#ifndef HAVE_LIBUTIL
+	UInt32			volumeBlocksUsed;
+#endif
 	UInt32			temp;
 	UInt32 			bytesUsed;
 	UInt32			endOfAttributes;
@@ -410,8 +427,18 @@ make_hfsplus(const DriveInfo *driveInfo, hfsparams_t *defaults)
 	sector = header->catalogFile.extents[0].startBlock * sectorsPerBlock;
 	WriteBuffer(driveInfo, sector, bytesToZero, NULL);
 	
+#ifdef HAVE_LIBUTIL
 	/* use wipefs() API to clear metadata from device */
 	(void) dowipefs(driveInfo->fd);
+#else
+	volumeBlocksUsed = header->totalBlocks - header->freeBlocks - 1;
+	if ( header->blockSize == 512 )
+		volumeBlocksUsed--;
+	bytesUsed = ((header->totalBlocks - header->freeBlocks) * sectorsPerBlock) * kBytesPerSector;
+	WriteBuffer(driveInfo, 0, bytesUsed, NULL);
+	/* also clear out last 8 sectors (4K) */
+	WriteBuffer(driveInfo, driveInfo->totalSectors - 8, 4 * 1024, NULL);
+#endif
 
 	/*--- Allocate a buffer for the rest of our IO:  */
 
@@ -1256,10 +1283,15 @@ clear_journal_dev(const char *dev_name)
 	return -1;
     }
 
+#ifdef HAVE_LIBUTIL
     dowipefs(fd);
 
     close(fd);
     return 0;
+#else /* FIXME */
+    printf("Clearing the journal device %s not supported\n", dev_name);
+    return -1;
+#endif
 }
 
 
