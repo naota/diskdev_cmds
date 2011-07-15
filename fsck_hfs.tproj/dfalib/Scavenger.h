@@ -1440,8 +1440,4 @@ void dumpblocklist(SGlobPtr GPtr);
 };
 #endif
 
-#if LINUX
-#undef XATTR_MAXNAMELEN
-#endif
-
 #endif /* __SCAVENGER__ */
