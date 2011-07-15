@@ -80,7 +80,7 @@
 #define OSSwapBigToHostInt64(x)		be64_to_cpu(x)
 
 #if __BYTE_ORDER == __LITTLE_ENDIAN
-/* Big Endian Swaps */
+/* Little Endian Swaps */
 #ifndef be16_to_cpu
 #define be16_to_cpu(x) bswap_16(x)
 #endif
