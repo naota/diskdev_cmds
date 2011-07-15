@@ -117,4 +117,6 @@
 
 #define KAUTH_FILESEC_XATTR "com.apple.system.Security"
 
+#define strlcpy(dest, src, n) strncpy(dest, src, n)
+
 #endif
