@@ -519,7 +519,11 @@ doit:
 			size_t len;
 
 			count++;
+#if LINUX
+			len = getline(&resp, &len, stdin);
+#else
 			resp = fgetln(stdin, &len);
+#endif
 			if (resp == NULL || len == 0) {
 				if (count > 10) {
 					// Only ask so many times...
