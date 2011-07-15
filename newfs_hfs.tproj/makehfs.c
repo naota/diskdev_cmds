@@ -186,7 +186,7 @@ void SETOFFSET (void *buffer, UInt16 btNodeSize, SInt16 recOffset, SInt16 vecOff
 
 #if LINUX
 #define ENCODING_TO_BIT(e)       (e)
-#elsif TARGET_OS_EMBEDDED
+#elif TARGET_OS_EMBEDDED
 #define ENCODING_TO_BIT(e)				 \
 	  ((e) < 48 ? (e) : 0)
 #else
