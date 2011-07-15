@@ -88,6 +88,8 @@ extern Boolean _CFStringGetFileSystemRepresentation(CFStringRef string, UInt8 *b
 #include "newfs_hfs.h"
 #include "readme.h"
 
+#include <openssl/sha.h>
+
 
 #define HFS_BOOT_DATA	"/usr/share/hfsprogs/hfsbootdata"
 
